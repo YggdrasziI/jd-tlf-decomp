@@ -9,8 +9,8 @@ Usage:
   python tools/report_diff.py --base other.json # compare with another report
   python tools/report_diff.py --version NPUG80330
 
-Exit status 1 when a function present in both reports lost match percentage, or a
-fully matched function or data section disappeared without a 100 % replacement.
+Exit status 1 when an item present in both reports lost match percentage, or an
+item disappeared without an added item (a rename) matching at least as well.
 """
 
 import argparse
@@ -36,6 +36,11 @@ def load(path):
         # removed and re-added.
         for func in unit.get("functions", []):
             key = ("fn", func["name"])
+            # Same name twice (local symbols): number the copies, in report order
+            n = 2
+            while key in items:
+                key = ("fn", f"{func['name']}#{n}")
+                n += 1
             items[key] = func.get("fuzzy_match_percent", 0.0)
             units[key] = name
         # Data sections of assembly pieces are not diffed, and their names repeat.
@@ -84,10 +89,17 @@ def main():
         elif new > old:
             improvements.append((key, old, new))
 
-    # A matched item that only changed name (symbol renamed) is not a regression.
+    # An item that only changed name (symbol or unit renamed) is not a regression:
+    # each removed item, best first, needs its own added item matching at least as well.
+    spare = sorted((pct for _, pct in added), reverse=True)
+    lost = []
+    for key, pct in sorted(removed, key=lambda r: -r[1]):
+        if spare and spare[0] >= pct:
+            spare.pop(0)
+        else:
+            lost.append((key, pct))
     added_full = sum(1 for _, pct in added if pct == 100.0)
     removed_full = [(key, pct) for key, pct in removed if pct == 100.0]
-    lost = removed_full[added_full:] if len(removed_full) > added_full else []
 
     def fmt(key):
         kind, name = key
@@ -115,6 +127,8 @@ def main():
         if old != new:
             print(f"{field}: {old} -> {new} ({new - old:+d})")
 
+    for key, pct in lost:
+        print(f"Lost: {fmt(key)} ({pct:.2f}) has no replacement")
     if regressions or lost:
         print("FAIL: regressions found")
         return 1
