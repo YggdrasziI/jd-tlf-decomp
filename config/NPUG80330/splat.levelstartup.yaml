@@ -62,6 +62,8 @@ segments:
     align: 4
     subsegments:
       - [0x74, asm, text]                  # .text
+      - [0x8EC28, cpp, unit_0008EBB4]
+      - [0x8EC7C, asm, text_0008EC08]
       - [0x96118, cpp, unit_000960A4]      # notes/SPLITS.md
       - [0x96380, asm, text_0009630C]      # func_0009630C, not matching yet
       - [0x96518, cpp, unit_000960A4_1]
@@ -74,6 +76,8 @@ segments:
       - [0x10BCC4, rodata, scenid]         # .rodata.sceNid
       - [0x10BFF4, rodata, rodata]         # .rodata
       - [0x116174, data, data]             # .data
+      - [0x12B1D4, .data, unit_0008EBB4]
+      - [0x12B1DC, data, data_0012B168]
       - [0x12CB04, .data, unit_0009B834]
       - [0x12CB0C, data, data_0012CA98]
       - [0x13FD6C, data, eh_frame]         # .eh_frame
