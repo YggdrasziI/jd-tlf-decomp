@@ -42,7 +42,10 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   `max`, `clz`, `madd`... encoded differently on mips32) into `.word`.
 - objdiff-cli **v3.8.3** (report, diff), objdiff GUI.
 - m2c (matt-kempster/m2c, pinned commit `c632946b`, installed from git: the PyPI
-  package named `m2c` is an unrelated project) for a first C draft.
+  package named `m2c` is an unrelated project) for a first C draft:
+  `python -m m2c.main --target mipsel-gcc-c --function <name>
+  build/NPUG80330/asm/NPUG80330/levelstartup/text.s.vfpu.s` (the `.vfpu.s` copy written
+  by the build, since m2c cannot parse VFPU mnemonics).
 - Compiler: **not identified**. SN Systems SNC is suspected (`notes/COMPILER.md`);
   nothing is compiled from C until it is settled.
 - Optional: Ghidra 11.2.1 with ghidra-allegrex, outside the repository.
