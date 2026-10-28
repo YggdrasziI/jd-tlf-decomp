@@ -1,0 +1,1 @@
+// Hand-made names, with evidence (SPEC.md naming conventions)
