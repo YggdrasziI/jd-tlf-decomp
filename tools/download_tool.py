@@ -44,8 +44,14 @@ def objdiff_url(tag: str) -> str:
     return f"https://github.com/encounter/objdiff/releases/download/{tag}/objdiff-cli-{platform.system}-{platform.machine}{platform.exe}"
 
 
+def compiler_url(tag: str) -> str:
+    # decomp.me compiler archives; the tag is the compiler id (pspsnc_1.2.7503.0)
+    return f"https://github.com/decompme/compilers/releases/download/compilers/{tag}.tar.gz"
+
+
 TOOLS = {
     "binutils": binutils_url,
+    "compiler": compiler_url,
     "wibo": wibo_url,
     "objdiff": objdiff_url,
 }

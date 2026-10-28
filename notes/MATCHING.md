@@ -14,7 +14,7 @@ found. Empty sections are placeholders until the compiler is known (`notes/COMPI
 - Floats: single precision FPU (`lwc1`, `mul.s`, `c.lt.s` + `bc1t`); no doubles in
   hardware.
 - VFPU: assembled as `.word` (`tools/vfpu_words.py`); in C it needs inline assembly or
-  intrinsics, so VFPU functions stay `INCLUDE_ASM` until the compiler's VFPU support is
+  intrinsics, so VFPU functions stay assembly until the compiler's VFPU support is
   known.
 
 ## Loads, aliasing and const

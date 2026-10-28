@@ -55,10 +55,14 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
 
 1. `tools/prx_reloc.py --absolute`: the original PRX with every reference to program
    header 1 made absolute, so the disassembly gets the right symbols.
-2. splat splits that image: ELF header and the tail (`.shstrtab`, section headers,
+2. splat splits that image, with `config/NPUG80330/reloc_addrs.prx.txt` turning back
+   into plain values the address guesses the PRX does not relocate
+   (`tools/reloc_overrides.py`): ELF header and the tail (`.shstrtab`, section headers,
    relocation tables, `.symtab`) as `bin`, program header 0 as text, rodata and data
    regions, program header 1 as `.sdata` + bss.
-3. `as` / `objcopy -I binary`, then `ld` with the splat linker script, `objcopy -O
+3. `as` for assembly, SNC for `src/` (`tools/compile.py`: `-O2 -g`, then removes
+   the empty `.rodata`/`.data` SNC always emits, whose 8-byte alignment would add
+   padding), `objcopy -I binary`, then `ld` with the splat linker script, `objcopy -O
    binary`: the absolute image.
 4. `tools/prx_reloc.py --relative` gives the PRX back; `tools/sha1.py` checks it.
 
@@ -71,8 +75,10 @@ from the link is a later task.
 - Every build ends with `build/NPUG80330/LEVELSTARTUP_DISC.PRX: OK` (`ninja`),
   locally and in CI.
 - A unit is matching only when objdiff reports 100 % for all its functions and data
-  and the build still matches. Anything else keeps its `INCLUDE_ASM` functions, with
-  the remaining gap written above each unfinished function.
+  and the build still matches. An unfinished function stays an `asm` subsegment of the
+  splat yaml between the unit's `cpp` pieces, with its gap written as a comment where
+  it would sit in the source. There is no `INCLUDE_ASM`: SNC emits file-scope `asm`
+  blocks after the next function, out of source order.
 - A split that builds proves the bytes, not the translation unit: a TU boundary is
   proven only once the unit is decompiled and matches (`notes/SPLITS.md`).
 - Every name, compiler fact or structure layout rests on evidence (strings with their
@@ -117,5 +123,10 @@ notes/                    reference documentation
 pip install -r tools/requirements.txt
 python tools/extract.py      # orig/NPUG80330/<iso> -> LEVELSTARTUP_DISC.PRX, SHA-1 checks
 python tools/configure.py    # absolute image, splat, build.ninja
-ninja                        # assemble, link, PRX, SHA-1 check
+ninja                        # assemble, compile, link, PRX, SHA-1 check
+ninja report                 # objdiff report: build/NPUG80330/report.json
 ```
+
+`configure.py` also writes `objdiff.json`: each `src/` unit is compared with a target
+object assembled from splat's assembly of its functions (`build/NPUG80330/target/`);
+the remaining `text*` assembly files are target-only units.
