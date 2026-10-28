@@ -1,5 +1,5 @@
 // Compiler probe: small leaf functions of LEVELSTARTUP_DISC.PRX rewritten by hand.
-// python tools/compiler_probe.py tools/probes/snc_leaf.cpp -- -O2
+// python tools/compiler_probe.py tools/probes/snc_leaf.cpp -- -O2 -g
 // Names and types are guesses; only the generated code matters.
 
 extern void func_00015FC0(int, int);
@@ -15,8 +15,6 @@ struct E16 { char b[16]; };
 extern E16 D_0010CDA0[];
 E16* func_000225A8(int i) { return &D_0010CDA0[i]; }
 
-// Mismatch: the original has a single return (b to a shared jr ra), SNC
-// 1.2.7503.0 duplicates the return
 extern int D_00126D34;
 extern int D_00126D38;
 int func_0007E6D8(int a, int b) {
@@ -29,10 +27,10 @@ int func_0007E6D8(int a, int b) {
 struct func_0007F95C { int a, b, c, d; func_0007F95C(); };
 func_0007F95C::func_0007F95C() { a = 0; b = 0; c = 0; d = 0; }
 
-// Mismatch: the original loads the pointer into $a1, SNC uses $a0
-struct S5 { char pad[0x202C]; void (*fn)(); };
+// The argument is passed through to the callback: $a0 stays live, the pointer goes to $a1
+struct S5 { char pad[0x202C]; int (*fn)(int); };
 extern S5 D_00190670;
-void func_001051AC() { if (D_00190670.fn) D_00190670.fn(); }
+void func_001051AC(int a) { if (D_00190670.fn) D_00190670.fn(a); }
 
 struct E8 { int a; int b; };
 extern E8 D_0011B898[];

@@ -1,10 +1,11 @@
 # Compiler evidence
 
-Status: **SN Systems SNC, most likely; version not settled**. SNC 1.2.7503.0 at `-O2`
-gives byte-identical code for 6 of 8 probe functions (below). The two others differ
-in branch layout and register choice, which may mean another SNC version, other
-flags or other source; no conclusion yet. A compiler is proven only by
-byte-identical probes.
+Status: **SN Systems SNC; working flags `-O2 -g` (or `-O3 -g`)**. With
+`pspsnc_1.2.7503.0 -O2 -g`, 15 of 16 hand-written probe functions are
+byte-identical (below), including loops, float code and a constructor. Whether
+1.2.7503.0 is the game's exact version is not proven: the remaining mismatch may be
+a source difference. A compiler is proven only by byte-identical probes; more probes
+(switch, virtual calls, VFPU-free math, larger functions) follow as units are written.
 
 ## Probes
 
@@ -22,14 +23,30 @@ are unpacked in `tools/compilers/<id>/` (ignored by git).
 | 2026-10-28 | `func_0007E6D8`, 9 source variants (single return, `goto`, `bool`, `?:`) | `pspsnc_1.2.7503.0 -O2` | no match: SNC duplicates `jr $ra`, the original branches to a single epilogue |
 | 2026-10-28 | `func_001051AC`, 4 variants (extra parameters, member function, local copy) | `pspsnc_1.2.7503.0 -O2` | no match: the original uses `$a1` for the loaded pointer, SNC `$a0` |
 | 2026-10-28 | `snc_leaf.cpp` | `mwccpsp_3.0.1_219` run natively | did not finish (hangs, likely the licence manager); to retry through wibo |
+| 2026-10-28 | `tools/probes/snc_branch.cpp` (8 functions: loops, early returns, floats) | `pspsnc_1.2.7503.0 -O2` | 1/8: SNC merges and duplicates returns, uses branch-likely |
+| 2026-10-28 | same | `-O2` + one `-X<var>=0..5` at a time (alias, callmod, constp, copyp, fcm, flow, inllev, sinllev, mopt, reg, sched, unroll, xopt, zone) | no improvement over `-O2` |
+| 2026-10-28 | both probes | **`-O2 -g`** | **15/16** after source fixes (`snc_leaf` 8/8, `snc_branch` 7/8); `-O3 -g` same, `-O1 -g` 0/16 |
+| 2026-10-28 | both probes | `-O2 -g` + one `-X<var>` at a time | no improvement over `-O2 -g` |
 
 SNC 1.2.7503.0 reproduces the idioms of the original: `or $rd, $rs, $zero` for moves,
 `ori` for small constants, a 16-byte frame with `$ra` at `0($sp)`, `$a0` as the
 `%hi` scratch register for loads, constructors returning `this` in `$v0`.
 
-Only 71 of the 4048 functions of the original have more than one `jr $ra`; SNC
-1.2.7503.0 at `-O2` duplicates returns readily. If that holds on more probes, the
-game used another SNC version (or a flag not found yet).
+`-g` (debug information) changes code generation: without it SNC duplicates
+returns, threads jumps and uses branch-likely; with it, each function keeps a single
+epilogue and unthreaded `b` chains (`b .L1; nop` to a `b .L2`), as in the original
+(only 71 of its 4048 functions have more than one `jr $ra`).
+
+Source-level findings so far (for `notes/MATCHING.md` once units are written):
+- a struct copy `*out = in` emits word moves; field-by-field float copies give the
+  original's `lwc1`/`swc1` pairs;
+- an argument passed through to a call keeps `$a0` live, which moves temporaries to
+  `$a1`; a register-only mismatch can mean a missing parameter;
+- `if (b == 0.0f) return 0.0f;` and `return b;` differ (constant reloaded vs
+  register reused).
+
+The `-O<n>` groups expand to control variables (strings in `pspsnc.exe`):
+`alias callmod constp copyp fcm flow inllev sinllev mopt reg sched unroll xopt zone`.
 
 `psp-gcc-1.3.1` from decomp.me is a Linux i386 build and was not run (Windows host,
 no WSL).
@@ -50,7 +67,7 @@ no WSL).
 ## Candidates
 
 1. **SN Systems SNC** (ProDG for PSP): favoured by `.cplinit`, `.linkonce.d`, the
-   readable `type_info` names and the 6/8 identical probes. decomp.me has one
+   readable `type_info` names and 15/16 identical probes at `-O2 -g`. decomp.me has one
    build, `pspsnc_1.2.7503.0`; the game's exact version is unknown.
 2. **Metrowerks mwccpsp** (sotn-decomp uses 2.19 through `bin/mw`/wibo): EDG-like
    runtime too, but CodeWarrior output usually has different section names.
@@ -60,9 +77,7 @@ no WSL).
 
 - Look for known SNC runtime routines (`__sn*`, `_sn_*`), libsn, and the EH table
   format referenced by `.cplinit`/`.data`.
-- More probes (loops, switch, floats, C++ virtual calls) to tell whether the
-  single-return layout is a version difference or a source difference.
-- SNC control variables (`pspsnc -X...`; strings in `pspsnc.exe`/`pspcq.exe`) that
-  change block layout or register allocation.
+- `func_0002D818`: the original loads `self->key` before `i = 0`; not reproduced yet.
+- More probes (switch, virtual calls, larger functions) while writing units.
 - mwccpsp through wibo, to rule it out with the same probe.
 - Record each test here with its date, its input and its result.
