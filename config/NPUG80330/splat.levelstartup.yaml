@@ -13,7 +13,7 @@ options:
   basename: LEVELSTARTUP_DISC
   base_path: ../..
   target_path: build/NPUG80330/LEVELSTARTUP_DISC.abs.prx
-  compiler: GCC # provisional: SNC suspected, notes/COMPILER.md
+  compiler: GCC # splat output style only; the compiler is SNC (notes/COMPILER.md)
   ld_script_path: build/NPUG80330/levelstartup.ld
   asm_path: asm/NPUG80330/levelstartup
   src_path: src
