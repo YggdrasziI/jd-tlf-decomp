@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 
 SHF_ALLOC = 0x2
-SHT_NOBITS = 8
 
 
 def empty_alloc_sections(path: Path) -> list[str]:
@@ -25,7 +24,7 @@ def empty_alloc_sections(path: Path) -> list[str]:
     headers = [struct.unpack_from("<10I", d, shoff + i * shentsize) for i in range(shnum)]
     strtab = headers[shstrndx][4]
     names = []
-    for name, type_, flags, _addr, _off, size, *_ in headers:
+    for name, _type, flags, _addr, _off, size, *_ in headers:
         if flags & SHF_ALLOC and size == 0:
             names.append(d[strtab + name:d.index(b"\0", strtab + name)].decode())
     return names
