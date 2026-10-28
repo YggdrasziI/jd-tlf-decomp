@@ -41,7 +41,8 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   `tools/vfpu_words.py` turns VFPU instructions and the Allegrex-only ones (`min`,
   `max`, `clz`, `madd`... encoded differently on mips32) into `.word`.
 - objdiff-cli **v3.8.3** (report, diff), objdiff GUI.
-- m2c **0.4.7** for a first C draft.
+- m2c (matt-kempster/m2c, pinned commit `c632946b`, installed from git: the PyPI
+  package named `m2c` is an unrelated project) for a first C draft.
 - Compiler: **not identified**. SN Systems SNC is suspected (`notes/COMPILER.md`);
   nothing is compiled from C until it is settled.
 - Optional: Ghidra 11.2.1 with ghidra-allegrex, outside the repository.

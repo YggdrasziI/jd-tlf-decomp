@@ -15,7 +15,8 @@
   Alternative: [sozud/binutils-allegrex](https://github.com/sozud/binutils-allegrex)
   (used by sotn-decomp, Linux build in its releases).
 - [encounter/objdiff](https://github.com/encounter/objdiff): diff and report.
-- [matt-kempster/m2c](https://github.com/matt-kempster/m2c) 0.4.7: MIPS to C draft.
+- [matt-kempster/m2c](https://github.com/matt-kempster/m2c) at commit `c632946b`: MIPS to C draft.
+  Not on PyPI: the PyPI `m2c` is an unrelated project.
 - [simonlindholm/asm-differ](https://github.com/simonlindholm/asm-differ),
   [simonlindholm/decomp-permuter](https://github.com/simonlindholm/decomp-permuter):
   optional, once a compiler is known.
