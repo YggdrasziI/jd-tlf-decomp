@@ -32,6 +32,7 @@ build.ninja
 # Downloaded tools
 /objdiff-cli*
 tools/binutils/
+tools/compilers/
 
 # Ghidra projects live outside the repo, but never commit one by accident
 *.gpr
