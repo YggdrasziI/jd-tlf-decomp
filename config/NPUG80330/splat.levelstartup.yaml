@@ -63,7 +63,9 @@ segments:
     subsegments:
       - [0x74, asm, text]                  # .text
       - [0x96118, cpp, unit_000960A4]      # notes/SPLITS.md
-      - [0x96144, asm, text_000960D0]
+      - [0x96380, asm, text_0009630C]      # func_0009630C, not matching yet
+      - [0x96518, cpp, unit_000960A4_1]
+      - [0x9659C, asm, text_00096528]
       - [0x10B658, asm, scestub]           # .sceStub.text.* (system imports)
       - [0x10B9D8, rodata, sceresident]    # .rodata.sceResident
       - [0x10BB30, rodata, lib]            # .lib.ent*, .lib.stub*, .rodata.sceModuleInfo

@@ -9,8 +9,10 @@ when the unit is decompiled and matches.
 | Range | splat subsegment | Content |
 |---|---|---|
 | 0x000000-0x0960A4 | `text` (asm) | `.text`, not split yet |
-| 0x0960A4-0x0960D0 | `unit_000960A4` (cpp) | see Units |
-| 0x0960D0-0x10B5E4 | `text_000960D0` (asm) | `.text`, not split yet |
+| 0x0960A4-0x09630C | `unit_000960A4` (cpp) | see Units |
+| 0x09630C-0x0964A4 | `text_0009630C` (asm) | `func_0009630C`, part of `unit_000960A4`, not matching yet |
+| 0x0964A4-0x096528 | `unit_000960A4_1` (cpp) | second part of `unit_000960A4` |
+| 0x096528-0x10B5E4 | `text_00096528` (asm) | `.text`, not split yet |
 | 0x10B5E4-0x10B964 | `scestub` (asm) | system import stubs (`.sceStub.text.*`) |
 | 0x10B964-0x10BABC | `sceresident` (rodata) | `.rodata.sceResident`: library names, export NIDs and values |
 | 0x10BABC-0x10BC50 | `lib` (rodata) | `.lib.ent*`, `.lib.stub*`, `.rodata.sceModuleInfo` |
@@ -39,7 +41,7 @@ Each is a lead for a unit name and bound (SPEC.md naming), not a bound:
 
 | Unit | vram range | Functions | Status | Bounds |
 |---|---|---|---|---|
-| `src/unit_000960A4.cpp` | 0x0960A4-0x0960D0 | `func_000960A4` (get `D_0012C280`), `func_000960B0` (`D_0012C280 == -1`), `func_000960C4` (set `D_0012BFE8`) | matching (2026-10-28) | hypothesis: a run of small accessors; the functions after 0x960D0 also use `D_0012C280` (0x961E8, 0x9630C, 0x964A4) and may be the same file |
+| `src/unit_000960A4.cpp` + `src/unit_000960A4_1.cpp` | 0x0960A4-0x096528 | `func_000960A4` (get `D_0012C280`), `func_000960B0` (`D_0012C280 == -1`), `func_000960C4` (set `D_0012BFE8`), `func_000960D0`/`func_00096160` (next/previous index in 0-5 where `func_000BC22C` returns 3), `func_000961E8` (applies the selection `D_0012C01C`), `func_0009630C` (assembly), `func_000964A4` (fills a selection) | 7 / 8 matching (2026-10-28); `func_0009630C` stays assembly (register allocation of the second owner test and the loop counters) | hypothesis: one file, since all eight use `D_0012C280` or the selection; the unit is split in two `.cpp` around the unfinished function |
 
-An `asm` piece is named after its start vram (`text_000960D0`); file offset = vram +
+An `asm` piece is named after its start vram (`text_00096528`); file offset = vram +
 0x74.
