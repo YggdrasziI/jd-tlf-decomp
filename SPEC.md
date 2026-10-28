@@ -48,7 +48,8 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   by the build, since m2c cannot parse VFPU mnemonics).
 - Compiler: **not identified**. SN Systems SNC is suspected (`notes/COMPILER.md`);
   nothing is compiled from C until it is settled.
-- Optional: Ghidra 11.2.1 with ghidra-allegrex, outside the repository.
+- Optional: Ghidra 12.2 (JDK 25) with ghidra-allegrex v21.5, outside the repository
+  (`tools/ghidra_sync.py`).
   PPSSPP for runtime debugging.
 
 ## Build pipeline

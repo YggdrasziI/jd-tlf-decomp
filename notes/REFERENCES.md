@@ -27,9 +27,11 @@
   psp-gcc), for tests and tooling, not for matching.
 - [John-K/pspdecrypt](https://github.com/John-K/pspdecrypt) or PPSSPP
   `Core/ELF/PrxDecrypter.cpp`: decrypt `EBOOT.BIN` (step 7).
-- Ghidra 11.2.1 (`E:\Projets\Github\Decomp\Tools\Ghidra`) with
-  [kotcrab/ghidra-allegrex](https://github.com/kotcrab/ghidra-allegrex) (PRX loader,
-  Allegrex + VFPU, NID names), outside the repository.
+- Ghidra 12.2 (`E:\Projets\Github\Decomp\Tools\Ghidra\ghidra_12.2_PUBLIC`, JDK 25
+  Temurin 25.0.5+8 beside it) with
+  [kotcrab/ghidra-allegrex](https://github.com/kotcrab/ghidra-allegrex) v21.5 (PRX
+  loader, Allegrex + VFPU, NID names), outside the repository; no ghidra-allegrex
+  build exists for Ghidra 11.2.1, which the sibling projects use.
 - PPSSPP (`E:\Projets\Github\Emulateur\PSP\ppsspp`, 8d96fdb6cd, not built locally):
   debugger (breakpoints, memory, disassembly; `.ppmap`/`.sym` symbol maps loaded from
   next to the game, `Core/Debugger/SymbolMap.cpp`), WebSocket debugger API, PRX loader
