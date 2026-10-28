@@ -119,7 +119,8 @@ def write_target_asm(module: str, unit: str) -> Path | None:
     out = build_dir / "target" / f"{unit}.s"
     (ROOT / out).parent.mkdir(parents=True, exist_ok=True)
     lines = ['.include "macro.inc"', ".set noat", ".set noreorder", '.section .text, "ax"']
-    lines += [f'.include "{posix(f)}"' for f in funcs]
+    # Copied, not included: assemble.py turns VFPU instructions into words in this file only
+    lines += [(ROOT / f).read_text() for f in funcs]
     (ROOT / out).write_text("\n".join(lines) + "\n", newline="\n")
     return out
 
