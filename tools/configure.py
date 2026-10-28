@@ -214,8 +214,9 @@ def main() -> None:
                 n.build(obj, "cc", source, implicit=cc_deps + [posix(binutils_stamp)])
                 unit = Path(source).with_suffix("").relative_to("src").as_posix()
                 target_asm = write_target_asm(module, unit)
+                # A cpp unit holds matched functions only, so it is always linked from source
                 unit_entry = {"name": unit, "base_path": obj,
-                              "metadata": {"complete": False, "source_path": source}}
+                              "metadata": {"complete": True, "source_path": source}}
                 if target_asm:
                     target_obj = posix(build_dir / "target" / f"{unit}.o")
                     n.build(target_obj, "as", posix(target_asm), implicit=[posix(binutils_stamp)])

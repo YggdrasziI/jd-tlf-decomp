@@ -32,3 +32,13 @@ jobs:
         run: |
           python tools/configure.py --version ${{ matrix.version }}
           ninja
+
+      # objdiff report of the units
+      - name: Report
+        run: ninja report
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-${{ matrix.version }}
+          path: build/${{ matrix.version }}/report.json

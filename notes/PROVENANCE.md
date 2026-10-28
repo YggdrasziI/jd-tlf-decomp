@@ -12,7 +12,17 @@ the owner's ts2-castaway project.
 | Our file | Changes |
 |---|---|
 | `tools/ninja_syntax.py`, `tools/get_platform.py` | none |
-| `tools/download_tool.py` | `dsd`/`mwccarm` removed; `binutils` (decompals) added, `.tar.gz` support, HTTP status check |
+| `tools/download_tool.py` | `dsd`/`mwccarm` removed; `binutils` (decompals) and `compiler` (decomp.me archives) added, `.tar.gz` support, HTTP status check |
+
+## Report and progress scripts (`tools/`)
+
+Source: the owner's ts2-castaway project (its own code), 2026-10-28.
+
+| Our file | Changes |
+|---|---|
+| `tools/report_diff.py` | version `NPUG80330`; assembly pieces (`asm/...`) instead of dsd gaps |
+| `tools/progress_badges.py` | title and version; function addresses from `func_<addr>` names and the splat symbol files instead of dsd `symbols.txt`; no regions yet |
+| `tools/unit_candidates.py` | rewritten for the splat assembly (`jal` calls, VFPU functions skipped); same output and options |
 
 `LICENSE` (CC0-1.0) is the same as the sibling projects'.
 
