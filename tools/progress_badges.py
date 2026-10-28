@@ -40,9 +40,14 @@ BADGES = [
 ]
 
 # Code regions of the card per version, from the region map of notes/SPLITS.md: a
-# list of (label, [(start, end), ...]) vram ranges. Empty until the region map of
-# LEVELSTARTUP_DISC.PRX (SDK libraries, runtime, engine, game) is known.
-REGIONS: dict[str, list] = {"NPUG80330": []}
+# list of (label, [(start, end), ...]) vram ranges.
+REGIONS: dict[str, list] = {
+    "NPUG80330": [
+        ("Game and engine", [(0x000000, 0x0F16AC)]),
+        ("Libraries", [(0x0F16AC, 0x10721C)]),
+        ("Late copies", [(0x10721C, 0x10B5E4)]),
+    ],
+}
 
 
 # Card colors (light, dark): bars are stacked fuzzy > perfect > linked.
