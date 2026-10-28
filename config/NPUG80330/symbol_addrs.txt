@@ -1,1 +1,5 @@
 // Hand-made names, with evidence (SPEC.md naming conventions)
+
+// Static initializations of decompiled files: the name SNC gives them from the
+// source path (src/<unit>.cpp; tools/compile.py makes them global for .cplinit)
+__sti__src_unit_0009B834_cpp = 0x0009B854; // type:func

@@ -12,13 +12,17 @@ when the unit is decompiled and matches.
 | 0x0960A4-0x09630C | `unit_000960A4` (cpp) | see Units |
 | 0x09630C-0x0964A4 | `text_0009630C` (asm) | `func_0009630C`, part of `unit_000960A4`, not matching yet |
 | 0x0964A4-0x096528 | `unit_000960A4_1` (cpp) | second part of `unit_000960A4` |
-| 0x096528-0x10B5E4 | `text_00096528` (asm) | `.text`, not split yet |
+| 0x096528-0x09B834 | `text_00096528` (asm) | `.text`, not split yet |
+| 0x09B834-0x09B874 | `unit_0009B834` (cpp) | see Units |
+| 0x09B874-0x10B5E4 | `text_0009B874` (asm) | `.text`, not split yet |
 | 0x10B5E4-0x10B964 | `scestub` (asm) | system import stubs (`.sceStub.text.*`) |
 | 0x10B964-0x10BABC | `sceresident` (rodata) | `.rodata.sceResident`: library names, export NIDs and values |
 | 0x10BABC-0x10BC50 | `lib` (rodata) | `.lib.ent*`, `.lib.stub*`, `.rodata.sceModuleInfo` |
 | 0x10BC50-0x10BF80 | `scenid` (rodata) | `.rodata.sceNid` |
 | 0x10BF80-0x116100 | `rodata` (rodata) | `.rodata` (+ padding to 0x116100) |
-| 0x116100-0x13FCF8 | `data` (data) | `.data` |
+| 0x116100-0x12CA90 | `data` (data) | `.data` |
+| 0x12CA90-0x12CA98 | `unit_0009B834` (`.data`) | data of the unit |
+| 0x12CA98-0x13FCF8 | `data_0012CA98` (data) | `.data` |
 | 0x13FCF8-0x13FD6C | `eh_frame` (data) | `.eh_frame` |
 | 0x13FD6C-0x14004C | `mcpstub` (data) | `.sceStub.text.mcp` (92 stubs) |
 | 0x14004C-0x1408A4 | `ctors` (data) | `.ctors`, `.dtors`, `.cplinit`, `.psp_lib_markimport_`, `.psp_lib_mark_`, `.linkonce.d` |
@@ -76,6 +80,8 @@ Each is a lead for a unit name and bound (SPEC.md naming), not a bound:
 | Unit | vram range | Functions | Status | Bounds |
 |---|---|---|---|---|
 | `src/unit_000960A4.cpp` + `src/unit_000960A4_1.cpp` | 0x0960A4-0x096528 | `func_000960A4` (get `D_0012C280`), `func_000960B0` (`D_0012C280 == -1`), `func_000960C4` (set `D_0012BFE8`), `func_000960D0`/`func_00096160` (next/previous index in 0-5 where `func_000BC22C` returns 3), `func_000961E8` (applies the selection `D_0012C01C`), `func_0009630C` (assembly), `func_000964A4` (fills a selection) | 7 / 8 matching (2026-10-28); `func_0009630C` stays assembly (register allocation of the second owner test and the loop counters) | hypothesis: one file, since all eight use `D_0012C280` or the selection; the unit is split in two `.cpp` around the unfinished function |
+
+| `src/unit_0009B834.cpp` | 0x09B834-0x09B874, data 0x12CA90-0x12CA98 | `func_0009B834`, `func_0009B83C`, `func_0009B844`, `func_0009B84C` (empty; passed together as callbacks by `func_0007FAF8`), static initialization 0x9B854 (`D_0012CA94 = D_0012CA90 * 0.5f`) | matching, data included (2026-10-28) | **proven at both ends**: the previous `.cplinit` entry ends at 0x9B834, this file's entry 0x9B854 ends it; its `.data` (the two floats, 8 bytes, 8-aligned) is the SNC layout of the source |
 
 An `asm` piece is named after its start vram (`text_00096528`); file offset = vram +
 0x74.

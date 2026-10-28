@@ -27,6 +27,17 @@ found. Empty sections are placeholders until the compiler is known (`notes/COMPI
 
 ## Data layout
 
+- A file's own `.data` is a `.data` subsegment of its unit in the data segment
+  (`[<rom>, .data, <unit>]`, then a `data_<vram>` piece for the rest); globals keep
+  their `D_<addr>` names, in `extern "C"`.
+- A global initialized from another global (`float b = a * 0.5f;`) is a dynamic
+  initialization: code in `__sti__<file>` and a 0 in `.data`. A non-static one
+  goes to COMMON (`.bss`), a `static` one stays in `.data` after the file's
+  initialized globals (`unit_0009B834`).
+- The static initialization is named by SNC after the path given to it:
+  `__sti__src_<unit>_cpp`. Put that name in `symbol_addrs.txt` at its address;
+  `tools/compile.py` makes it global for the `.cplinit` table.
+
 ## Control flow
 
 ## C++ classes, virtual calls and RTTI
