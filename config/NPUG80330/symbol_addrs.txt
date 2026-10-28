@@ -4,3 +4,4 @@
 // source path (src/<unit>.cpp; tools/compile.py makes them global for .cplinit)
 __sti__src_unit_0008EBB4_cpp = 0x0008EBE8; // type:func
 __sti__src_unit_0009B834_cpp = 0x0009B854; // type:func
+__sti__src_unit_0009E65C_cpp = 0x0009E6CC; // type:func

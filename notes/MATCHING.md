@@ -30,6 +30,9 @@ found. Empty sections are placeholders until the compiler is known (`notes/COMPI
 - A file's own `.data` is a `.data` subsegment of its unit in the data segment
   (`[<rom>, .data, <unit>]`, then a `data_<vram>` piece for the rest); globals keep
   their `D_<addr>` names, in `extern "C"`.
+- String literals go to the file's `.rodata`, padded by SNC to a multiple of 8
+  (`unit_0009E65C`: 0x1B characters + NUL -> 0x20). objdiff scores such a section
+  below 100 % because the literal has no symbol; check the bytes (`objdump -s`).
 - A global initialized from another global (`float b = a * 0.5f;`) is a dynamic
   initialization: code in `__sti__<file>` and a 0 in `.data`. A non-static one
   goes to COMMON (`.bss`), a `static` one stays in `.data` after the file's

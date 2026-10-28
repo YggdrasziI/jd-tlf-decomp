@@ -70,16 +70,22 @@ segments:
       - [0x9659C, asm, text_00096528]
       - [0x9B8A8, cpp, unit_0009B834]
       - [0x9B8E8, asm, text_0009B874]
+      - [0x9E6D0, cpp, unit_0009E65C]
+      - [0x9E760, asm, text_0009E6EC]
       - [0x10B658, asm, scestub]           # .sceStub.text.* (system imports)
       - [0x10B9D8, rodata, sceresident]    # .rodata.sceResident
       - [0x10BB30, rodata, lib]            # .lib.ent*, .lib.stub*, .rodata.sceModuleInfo
       - [0x10BCC4, rodata, scenid]         # .rodata.sceNid
       - [0x10BFF4, rodata, rodata]         # .rodata
+      - [0x110104, .rodata, unit_0009E65C]
+      - [0x110124, rodata, rodata_001100B0]
       - [0x116174, data, data]             # .data
       - [0x12B1D4, .data, unit_0008EBB4]
       - [0x12B1DC, data, data_0012B168]
       - [0x12CB04, .data, unit_0009B834]
       - [0x12CB0C, data, data_0012CA98]
+      - [0x12DFE4, .data, unit_0009E65C]
+      - [0x12DFEC, data, data_0012DF78]
       - [0x13FD6C, data, eh_frame]         # .eh_frame
       - [0x13FDE0, data, mcpstub]          # .sceStub.text.mcp (imports from the EBOOT)
       - [0x1400C0, data, ctors]            # .ctors .dtors .cplinit .psp_lib_mark* .linkonce.d

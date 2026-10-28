@@ -16,17 +16,23 @@ when the unit is decompiled and matches.
 | 0x0964A4-0x096528 | `unit_000960A4_1` (cpp) | second part of `unit_000960A4` |
 | 0x096528-0x09B834 | `text_00096528` (asm) | `.text`, not split yet |
 | 0x09B834-0x09B874 | `unit_0009B834` (cpp) | see Units |
-| 0x09B874-0x10B5E4 | `text_0009B874` (asm) | `.text`, not split yet |
+| 0x09B874-0x09E65C | `text_0009B874` (asm) | `.text`, not split yet |
+| 0x09E65C-0x09E6EC | `unit_0009E65C` (cpp) | see Units |
+| 0x09E6EC-0x10B5E4 | `text_0009E6EC` (asm) | `.text`, not split yet |
 | 0x10B5E4-0x10B964 | `scestub` (asm) | system import stubs (`.sceStub.text.*`) |
 | 0x10B964-0x10BABC | `sceresident` (rodata) | `.rodata.sceResident`: library names, export NIDs and values |
 | 0x10BABC-0x10BC50 | `lib` (rodata) | `.lib.ent*`, `.lib.stub*`, `.rodata.sceModuleInfo` |
 | 0x10BC50-0x10BF80 | `scenid` (rodata) | `.rodata.sceNid` |
-| 0x10BF80-0x116100 | `rodata` (rodata) | `.rodata` (+ padding to 0x116100) |
+| 0x10BF80-0x110090 | `rodata` (rodata) | `.rodata` |
+| 0x110090-0x1100B0 | `unit_0009E65C` (`.rodata`) | rodata of the unit |
+| 0x1100B0-0x116100 | `rodata_001100B0` (rodata) | `.rodata` (+ padding to 0x116100) |
 | 0x116100-0x12B160 | `data` (data) | `.data` |
 | 0x12B160-0x12B168 | `unit_0008EBB4` (`.data`) | data of the unit |
 | 0x12B168-0x12CA90 | `data_0012B168` (data) | `.data` |
 | 0x12CA90-0x12CA98 | `unit_0009B834` (`.data`) | data of the unit |
-| 0x12CA98-0x13FCF8 | `data_0012CA98` (data) | `.data` |
+| 0x12CA98-0x12DF70 | `data_0012CA98` (data) | `.data` |
+| 0x12DF70-0x12DF78 | `unit_0009E65C` (`.data`) | data of the unit |
+| 0x12DF78-0x13FCF8 | `data_0012DF78` (data) | `.data` |
 | 0x13FCF8-0x13FD6C | `eh_frame` (data) | `.eh_frame` |
 | 0x13FD6C-0x14004C | `mcpstub` (data) | `.sceStub.text.mcp` (92 stubs) |
 | 0x14004C-0x1408A4 | `ctors` (data) | `.ctors`, `.dtors`, `.cplinit`, `.psp_lib_markimport_`, `.psp_lib_mark_`, `.linkonce.d` |
@@ -87,6 +93,7 @@ Each is a lead for a unit name and bound (SPEC.md naming), not a bound:
 
 | `src/unit_0008EBB4.cpp` | 0x08EBB4-0x08EC08, data 0x12B160-0x12B168 | `func_0008EBB4`, `func_0008EBBC` (calls `func_0007E918`), `func_0008EBD8`, `func_0008EBE0` (passed together as callbacks by `func_0007FF08`), static initialization 0x8EBE8 (`D_0012B164 = D_0012B160 * 0.5f`) | matching, data included (2026-10-28) | **proven at both ends** (`.cplinit` entries 0x8EA44 and 0x8EBE8); same data and initialization as `unit_0009B834` (hypothesis: shared header) |
 | `src/unit_0009B834.cpp` | 0x09B834-0x09B874, data 0x12CA90-0x12CA98 | `func_0009B834`, `func_0009B83C`, `func_0009B844`, `func_0009B84C` (empty; passed together as callbacks by `func_0007FAF8`), static initialization 0x9B854 (`D_0012CA94 = D_0012CA90 * 0.5f`) | matching, data included (2026-10-28) | **proven at both ends**: the previous `.cplinit` entry ends at 0x9B834, this file's entry 0x9B854 ends it; its `.data` (the two floats, 8 bytes, 8-aligned) is the SNC layout of the source |
+| `src/unit_0009E65C.cpp` | 0x09E65C-0x09E6EC, rodata 0x110090-0x1100B0, data 0x12DF70-0x12DF78 | `func_0009E65C`, `func_0009E664` (empty), `func_0009E66C` (on flag 0x2000: `func_0007F450(0, 0)`, `func_00015FC0(4, 0)`), `func_0009E6A4` (`func_00066138(100, 100, "screenVehicleCustomization")`), static initialization 0x9E6CC (`D_0012DF74 = D_0012DF70 * 0.5f`) | matching, rodata and data included (2026-10-28); objdiff shows the `.rodata` at 91.5 % only because the target names the string `D_00110090` and SNC does not name literals (bytes identical) | **proven at both ends** (`.cplinit` entries 0x9E5F4 and 0x9E6CC); the string is padded to 8 bytes by SNC (0x20) |
 
 An `asm` piece is named after its start vram (`text_00096528`); file offset = vram +
 0x74.
