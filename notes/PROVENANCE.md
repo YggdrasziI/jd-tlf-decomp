@@ -23,6 +23,7 @@ Source: the owner's ts2-castaway project (its own code), 2026-10-28.
 | `tools/report_diff.py` | version `NPUG80330`; assembly pieces (`asm/...`) instead of dsd gaps |
 | `tools/progress_badges.py` | title and version; function addresses from `func_<addr>` names and the splat symbol files instead of dsd `symbols.txt`; no regions yet |
 | `tools/unit_candidates.py` | rewritten for the splat assembly (`jal` calls, VFPU functions skipped); same output and options |
+| `tools/asm_compare.py` | usage examples for this project; assembly pieces have no right side |
 
 `LICENSE` (CC0-1.0) is the same as the sibling projects'.
 
