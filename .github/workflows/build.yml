@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    # This is a *private* build container (YggdrasziI/jd-tlf-decomp-build):
+    # it holds the extracted game files in /orig.
+    container: ghcr.io/yggdraszii/jd-tlf-decomp-build:main
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [NPUG80330]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Copy the extracted PRX to the workspace
+      - name: Prepare
+        run: cp -a /orig/. ./orig/
+
+      - name: Python packages
+        run: pip install -r tools/requirements.txt
+
+      # Absolute image, splat, assemble, link, PRX, SHA-1 check
+      - name: Build
+        run: |
+          python tools/configure.py --version ${{ matrix.version }}
+          ninja
