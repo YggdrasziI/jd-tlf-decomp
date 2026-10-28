@@ -246,8 +246,10 @@ def main() -> None:
     n.build("report", "phony", report)
     n.newline()
 
-    n.build("build.ninja", "configure",
-            implicit=["tools/configure.py"] + [posix(config_dir / c) for _, c in MODULES.values()])
+    # splat reads the symbol and relocation files too: a change must split again
+    split_inputs = [posix(config_dir / c) for _, c in MODULES.values()] + [
+        posix(config_dir / f) for f in ("symbol_addrs.txt", "symbol_addrs.prx.txt", "reloc_addrs.prx.txt")]
+    n.build("build.ninja", "configure", implicit=["tools/configure.py"] + split_inputs)
     n.build("all", "phony", checks)
     n.default("all")
     print("build.ninja written")
