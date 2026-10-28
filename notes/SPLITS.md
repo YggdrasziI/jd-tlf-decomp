@@ -8,7 +8,9 @@ when the unit is decompiled and matches.
 
 | Range | splat subsegment | Content |
 |---|---|---|
-| 0x000000-0x10B5E4 | `text` (asm) | `.text`, every function; units not split yet |
+| 0x000000-0x0960A4 | `text` (asm) | `.text`, not split yet |
+| 0x0960A4-0x0960D0 | `unit_000960A4` (cpp) | see Units |
+| 0x0960D0-0x10B5E4 | `text_000960D0` (asm) | `.text`, not split yet |
 | 0x10B5E4-0x10B964 | `scestub` (asm) | system import stubs (`.sceStub.text.*`) |
 | 0x10B964-0x10BABC | `sceresident` (rodata) | `.rodata.sceResident`: library names, export NIDs and values |
 | 0x10BABC-0x10BC50 | `lib` (rodata) | `.lib.ent*`, `.lib.stub*`, `.rodata.sceModuleInfo` |
@@ -35,4 +37,9 @@ Each is a lead for a unit name and bound (SPEC.md naming), not a bound:
 
 ## Units
 
-None yet.
+| Unit | vram range | Functions | Status | Bounds |
+|---|---|---|---|---|
+| `src/unit_000960A4.cpp` | 0x0960A4-0x0960D0 | `func_000960A4` (get `D_0012C280`), `func_000960B0` (`D_0012C280 == -1`), `func_000960C4` (set `D_0012BFE8`) | matching (2026-10-28) | hypothesis: a run of small accessors; the functions after 0x960D0 also use `D_0012C280` (0x961E8, 0x9630C, 0x964A4) and may be the same file |
+
+An `asm` piece is named after its start vram (`text_000960D0`); file offset = vram +
+0x74.
