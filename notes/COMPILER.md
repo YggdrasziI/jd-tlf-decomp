@@ -27,6 +27,7 @@ are unpacked in `tools/compilers/<id>/` (ignored by git).
 | 2026-10-28 | same | `-O2` + one `-X<var>=0..5` at a time (alias, callmod, constp, copyp, fcm, flow, inllev, sinllev, mopt, reg, sched, unroll, xopt, zone) | no improvement over `-O2` |
 | 2026-10-28 | both probes | **`-O2 -g`** | **15/16** after source fixes (`snc_leaf` 8/8, `snc_branch` 7/8); `-O3 -g` same, `-O1 -g` 0/16 |
 | 2026-10-28 | both probes | `-O2 -g` + one `-X<var>` at a time | no improvement over `-O2 -g` |
+| 2026-10-28 | `tools/probes/snc_sti.cpp` (layout: functions around two global objects) | `pspsnc_1.2.7503.0 -O2 -g` | functions in source order, then `__sti__snc_sti_cpp` (constructors, `__record_needed_destruction`) **last in `.text`**, and one 8-byte entry (address, 0) in `__cplinit`: the format of the PRX `.cplinit` (`tools/tu_ends.py`) |
 
 SNC 1.2.7503.0 reproduces the idioms of the original: `or $rd, $rs, $zero` for moves,
 `ori` for small constants, a 16-byte frame with `$ra` at `0($sp)`, `$a0` as the
