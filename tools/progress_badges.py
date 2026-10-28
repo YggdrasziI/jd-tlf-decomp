@@ -9,7 +9,8 @@ the built modules):
   progress/<version>/card.svg     progress card: code, data and functions, then code
                                   by region (REGIONS), each as a stacked bar (fuzzy,
                                   perfect, linked) with perfect / total counts
-  progress/<version>/history.csv  one line per --record
+  progress/<version>/history.csv  one line per --record, for the HEAD commit: record
+                                  after committing the unit, then commit progress/
 
 Usage:
   python tools/progress_badges.py                      # draw from build/NPUG80330/report.json
