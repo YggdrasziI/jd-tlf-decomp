@@ -1,0 +1,85 @@
+# splat config for USRDIR/BIN/LEVELSTARTUP_DISC.PRX (NPUG80330, US 1.00)
+#
+# The target is the "absolute" image written by tools/prx_reloc.py --absolute:
+# the PRX with every reference to program header 1 (.sdata/.sbss/.bss) moved
+# from segment-relative to absolute, so symbols resolve. The build links this
+# layout, then tools/prx_reloc.py --relative gives back the PRX.
+#
+# File layout (tools/prx_info.py): ELF header + program headers, program
+# header 0 (file 0x74, vram 0x0), program header 1 (file 0x140918, vram
+# 0x1408A8), then .shstrtab, section headers, relocation tables, .symtab.
+options:
+  platform: psp
+  basename: LEVELSTARTUP_DISC
+  base_path: ../..
+  target_path: build/NPUG80330/LEVELSTARTUP_DISC.abs.prx
+  compiler: GCC # provisional: SNC suspected, notes/COMPILER.md
+  ld_script_path: build/NPUG80330/levelstartup.ld
+  asm_path: asm/NPUG80330/levelstartup
+  src_path: src
+  build_path: build/NPUG80330
+  asset_path: build/NPUG80330/bin
+  cache_path: build/NPUG80330/.splat_cache
+  symbol_addrs_path:
+    - config/NPUG80330/symbol_addrs.prx.txt
+    - config/NPUG80330/symbol_addrs.txt
+  undefined_funcs_auto_path: build/NPUG80330/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/NPUG80330/undefined_syms_auto.txt
+  # module info: gp 0x7FF0 relative to program header 1 (0x1408A8)
+  gp_value: 0x148898
+  add_set_gp_64: false
+  section_order: [.text, .rodata, .data, .bss]
+  find_file_boundaries: false
+  migrate_rodata_to_functions: true
+  disassemble_all: true
+  disasm_unknown: true
+  use_legacy_include_asm: false
+  asm_jtbl_label_macro: jlabel
+  ld_bss_is_noload: true
+  # the PRX sections are not 16-aligned: keep the original layout
+  ld_align_segment_vram_end: false
+  ld_align_section_vram_end: false
+  ld_generate_symbol_per_data_segment: true
+  create_undefined_funcs_auto: true
+  create_undefined_syms_auto: true
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - [0x0, bin, elf_header]
+
+  # Program header 0
+  - name: main
+    type: code
+    start: 0x74
+    vram: 0x0
+    subalign: null
+    align: 4
+    subsegments:
+      - [0x74, asm, text]                  # .text
+      - [0x10B658, asm, scestub]           # .sceStub.text.* (system imports)
+      - [0x10B9D8, rodata, sceresident]    # .rodata.sceResident
+      - [0x10BB30, rodata, lib]            # .lib.ent*, .lib.stub*, .rodata.sceModuleInfo
+      - [0x10BCC4, rodata, scenid]         # .rodata.sceNid
+      - [0x10BFF4, rodata, rodata]         # .rodata
+      - [0x116174, data, data]             # .data
+      - [0x13FD6C, data, eh_frame]         # .eh_frame
+      - [0x13FDE0, data, mcpstub]          # .sceStub.text.mcp (imports from the EBOOT)
+      - [0x1400C0, data, ctors]            # .ctors .dtors .cplinit .psp_lib_mark* .linkonce.d
+
+  # Program header 1
+  - name: sdata
+    type: code
+    start: 0x140918
+    vram: 0x1408A8
+    bss_size: 0x990B0
+    subalign: null
+    align: 4
+    subsegments:
+      - [0x140918, data, sdata]            # .sdata
+      - { start: 0x140930, type: bss, vram: 0x1408C0, name: bss } # .sbss .bss
+
+  - [0x140930, bin, elf_tail]
+  - [0x189289]
