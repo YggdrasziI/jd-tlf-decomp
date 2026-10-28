@@ -23,6 +23,9 @@ options:
   symbol_addrs_path:
     - config/NPUG80330/symbol_addrs.prx.txt
     - config/NPUG80330/symbol_addrs.txt
+  # symbol guesses the PRX does not relocate (tools/reloc_overrides.py)
+  reloc_addrs_path:
+    - config/NPUG80330/reloc_addrs.prx.txt
   undefined_funcs_auto_path: build/NPUG80330/undefined_funcs_auto.txt
   undefined_syms_auto_path: build/NPUG80330/undefined_syms_auto.txt
   # module info: gp 0x7FF0 relative to program header 1 (0x1408A8)

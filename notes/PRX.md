@@ -63,9 +63,18 @@ orig PRX --prx_reloc --absolute--> build/NPUG80330/LEVELSTARTUP_DISC.abs.prx
          --splat--> asm/NPUG80330/levelstartup/*.s, build/NPUG80330/bin/elf_{header,tail}.bin,
                     build/NPUG80330/levelstartup.ld
 *.s --tools/assemble.py (vfpu_words + as)--> .o ; *.bin --objcopy -I binary--> .o
+src/*.cpp --tools/compile.py (SNC -O2 -g, empty sections removed)--> .o
 ld -T levelstartup.ld --> levelstartup.elf --objcopy -O binary--> levelstartup.bin
    --prx_reloc --relative--> LEVELSTARTUP_DISC.PRX --sha1--> OK
 ```
+
+The PRX relocation tables are the reference for what is an address:
+`tools/reloc_overrides.py` writes a `MIPS_NONE` override (`config/NPUG80330/
+reloc_addrs.prx.txt`) for every `%hi`/`%lo` or `.word` symbol of the splat output
+that has no relocation. Without them, constants such as `lui $a0, 0x7; addiu $a0,
+0x6B10` became references to code labels (`.L00076B10`) that break the link once
+`.text` is in several files; most entries are zero data words (null pointers).
+`%gp_rel` operands are relative to `$gp` and never relocated, so they are kept.
 
 splat groups the entries of one segment by section type in `section_order`
 (`.text`, `.rodata`, `.data`, `.bss`), so the yaml keeps each type in one contiguous
