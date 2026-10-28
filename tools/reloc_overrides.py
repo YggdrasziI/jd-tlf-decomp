@@ -39,7 +39,7 @@ def main() -> None:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--version", default="NPUG80330")
     parser.add_argument("--prx", default="LEVELSTARTUP_DISC.PRX")
-    parser.add_argument("--asm", type=Path, default=Path("asm/NPUG80330/levelstartup"))
+    parser.add_argument("--module", default="levelstartup", help="splat assembly folder asm/<version>/<module>")
     args = parser.parse_args()
 
     prx = Prx(ROOT / "orig" / args.version / args.prx)
@@ -53,7 +53,7 @@ def main() -> None:
                 roms.add(int(m.group(1), 16))
     before = len(roms)
 
-    for path in sorted((ROOT / args.asm).rglob("*.s")):
+    for path in sorted((ROOT / "asm" / args.version / args.module).rglob("*.s")):
         for line in path.read_text().splitlines():
             m = LINE.match(line)
             if not m:
