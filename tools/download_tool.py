@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 
 def binutils_url(tag: str) -> str:
-    # MIPS binutils with Allegrex support (no VFPU: tools/vfpu_words.py)
+    # MIPS binutils (no Allegrex or VFPU: tools/vfpu_words.py)
     ext = "zip" if platform.system == "windows" else "tar.gz"
     return (f"https://github.com/decompals/binutils-mips-ps2-decompals/releases/download/{tag}/"
             f"binutils-mips-ps2-decompals-{platform.system}-x86-64.{ext}")
