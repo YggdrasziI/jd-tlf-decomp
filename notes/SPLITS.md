@@ -25,6 +25,40 @@ when the unit is decompiled and matches.
 | 0x1408A8-0x1408C0 | `sdata` (data) | `.sdata` (program header 1) |
 | 0x1408C0-0x1D9970 | `bss` | `.sbss`, `.bss` |
 
+## Code regions of `.text` (vram)
+
+How each bound was found; "hypothesis" means not proven by a matching unit.
+
+| Range | Content | Evidence |
+|---|---|---|
+| 0x000000-0x0F16AC | game and engine code (C++) | the 87 first `.cplinit` entries (unit ends, below); calls to the 92 `mcp` imports (functions of the EBOOT) all over it; source paths `ENGINE/` and `SHARED/WAD/` (below); the code after 0x0F16AC calls back into it only through the start-up code (0x0F1B34 calls 0x014CAC, hypothesis: the game main) and from 0x10721C on |
+| 0x0F16AC-0x0F1EC0 | C library start-up and system glue (hypothesis: SDK libc / crt0) | `_exit`, `libc:%s: should be called from main thread` (0x0F16AC); sbrk on `UserSbrkLow`/`UserSbrkHigh` (0x0F17BC, `sceKernelAllocPartitionMemory`); stdin/stdout/stderr handles (0x0F18D4); `module_start` (0x0F197C, export table, starts the `user_main` thread) and `module_stop` (0x0F1B04) |
+| 0x0F1EC0-0x0F4394 | C++ runtime (hypothesis: SNC runtime) | `bad_alloc` (0x0F1EC0); `C++ runtime abort`, `terminate() called by the exception handling mechanism` (0x0F1F94); 0x0F1ED8 called by every deleting destructor of the module (hypothesis: `operator delete`); 0x0F36E8 called by 18 static initializers (hypothesis: `__record_needed_destruction`, named by the SNC probe) |
+| 0x0F4394-0x0F5460 | single-precision math library | error names `acosf`, `asinf`, `atan2f`, `expf`, `fmodf`, `powf`, `sqrtf`, one per function |
+| 0x0F5460-0x104530 | C library: formatted output, locale, arithmetic helpers (hypothesis: SDK libc) | `-Inf`/`Inf`/`NaN` (0x0FC450); `(null)`, `0123456789abcdef` (0x0FCDFC, 0x0FE79C: printf family); `sceKernelCpuSuspendIntr`/`ResumeIntr` (0x100C24); `C-SJIS`, `C-EUCJP`, `C-JIS` (0x101ED4); no call into the game region |
+| 0x104530-0x10721C | GE graphics library, C++ | first `sceGe*` import calls at 0x104530 (`sceGeEdramGetAddr`, `sceGeSetCallback`), then `sceGeListEnQueue`, `sceGeListUpdateStallAddr`, `sceDisplaySetFrameBuf`...; functions writing GE command words (`0x106140`: `0xD0000000 | float >> 8`); ends with the last `.cplinit` entry 0x1068F0-0x10721C (fills a table of GE commands): one SNC-compiled file at least |
+| 0x10721C-0x10B5E4 | functions called from the game, after the libraries | hypothesis: inline and template copies (COMDAT) the linker placed last: repeated shapes (recursive tree walks 0x1085A4/0x1095A8, 16 deleting destructors of 0x48 bytes calling 0x0F1ED8 at 0x109F80-0x10A3B8), many reached only through pointers; to check against the linker's COMDAT placement |
+
+Library code after the game code is the usual link order (objects, then
+libraries). Within 0x0F16AC-0x10721C, sub-ranges are taken from the first function
+showing each string or import; their inner bounds are approximate.
+
+## Unit ends from `.cplinit`
+
+SNC emits the static initialization of a file (`__sti__<file>`) after all its
+other functions and lists it in `.cplinit` (`tools/probes/snc_sti.cpp`,
+`notes/COMPILER.md`). The PRX `.cplinit` holds 88 such functions, in increasing
+address order (= link order): each ends the own code of one source file.
+`python tools/tu_ends.py` lists them with the unit end. Files without global
+objects to construct have no entry, so two entries can enclose several files.
+
+- 87 entries in the game region, from 0x0007D8 to 0x0EA214; the densest stretch is
+  0x070000-0x0A62A4 (56 entries).
+- No entry between 0x0A62A4 (end of the entry 0x0A5D9C) and 0x0BC580: the code there has no
+  static objects, its file bounds must come from other evidence.
+- `unit_000960A4` starts at 0x0960A4, right after the end of the entry 0x096058:
+  consistent with a file starting there.
+
 ## Source paths found in strings
 
 Each is a lead for a unit name and bound (SPEC.md naming), not a bound:
