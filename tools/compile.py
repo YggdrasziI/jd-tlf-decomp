@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Compile one C/C++ file with SNC, then drop its empty allocated sections.
+"""Compile one C/C++ file with SNC, then drop its empty allocated sections and make
+its static initialization global.
 
 SNC always emits `.rodata` and `.data`, 8-byte aligned, even when empty; GNU ld
 still aligns the location counter for them, which moves everything after. The
 original link shows no such padding, so empty sections are removed.
+
+The static initialization of a file (`__sti__<file>_cpp`) is a local symbol, but the
+`.cplinit` table, still assembly, refers to it by name (config/<version>/
+symbol_addrs.txt): it is made global.
 
 usage: compile.py <objcopy> <out.o> <compiler command...>
 (the compiler command must write <out.o>)
@@ -40,12 +45,10 @@ def main() -> None:
     result = subprocess.run(command)
     if result.returncode:
         sys.exit(result.returncode)
-    empty = empty_alloc_sections(out)
-    if empty:
-        args = [str(Path(objcopy).resolve())]
-        for name in empty:
-            args += ["--remove-section", name]
-        subprocess.run(args + [str(out)], check=True)
+    args = [str(Path(objcopy).resolve()), "--wildcard", "--globalize-symbol=__sti__*"]
+    for name in empty_alloc_sections(out):
+        args += ["--remove-section", name]
+    subprocess.run(args + [str(out)], check=True)
 
 
 if __name__ == "__main__":

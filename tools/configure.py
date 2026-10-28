@@ -160,7 +160,7 @@ def main() -> None:
     n.rule("download_compiler", f"$python tools/download_tool.py compiler {COMPILER} --path {posix(compiler_dir)}",
            description=f"DOWNLOAD {COMPILER}")
     n.build(posix(snc), "download_compiler")
-    cc_deps = [posix(snc)]
+    cc_deps = [posix(snc), "tools/compile.py"]
     if platform.system == "windows":
         cc_command = str(snc)
     else:
