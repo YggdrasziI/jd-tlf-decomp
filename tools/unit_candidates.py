@@ -26,9 +26,9 @@ GLABEL = re.compile(r"^glabel (\S+)")
 INSN = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/\s+([a-z0-9.]+)\s*(.*)$")
 
 
-def read_functions(asm_dir: Path) -> list[dict]:
+def read_functions(paths: list[Path]) -> list[dict]:
     funcs = []
-    for path in sorted(asm_dir.glob("text*.s")):
+    for path in paths:
         cur = None
         for line in path.read_text().splitlines():
             if m := GLABEL.match(line):
@@ -59,9 +59,12 @@ def main() -> None:
     parser.add_argument("--end", type=lambda x: int(x, 0), default=1 << 32)
     args = parser.parse_args()
 
-    funcs = read_functions(ROOT / "asm" / args.version / args.module)
+    asm_dir = ROOT / "asm" / args.version / args.module
+    funcs = read_functions(sorted(asm_dir.glob("text*.s")))
+    # Callers also count from the functions already in units (their original assembly)
+    unit_funcs = read_functions(sorted(asm_dir.glob("*matchings/*/*.s")))
     callers: dict[str, list[int]] = {}
-    for f in funcs:
+    for f in funcs + unit_funcs:
         for target in f["calls"]:
             callers.setdefault(target, []).append(f["addr"])
 
