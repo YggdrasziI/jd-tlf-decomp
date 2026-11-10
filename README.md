@@ -1,8 +1,18 @@
 Jak and Daxter: The Lost Frontier (PSP)
 =======================================
 
+> [!IMPORTANT]
+> AI Disclosure:
+> AI was used for the following tasks:
+> - Writing commentary (primarily translating into English and formatting).
+> - Documenting and citing the various sources used in the project (see PROVENANCE.md, REFERENCE.md, and more generally the files contained within the "notes" directory).
+> - Writing code (C, C++, Python, etc.—I used it as a tool) and reviewing my own work (yes, some code was written by AI, but it was verified by a human; I didn't simply type "Claude, decompile this for me").
+
 A work-in-progress matching decompilation of Jak and Daxter: The Lost Frontier for
 the PlayStation Portable, built with [splat](https://github.com/ethteck/splat).
+
+> [!NOTE]
+> No port to PC or other platforms is planned for the time being, but should that change, the link will appear here
 
 This repository does **not** contain any game assets or assembly whatsoever. An
 existing copy of the game is required.
