@@ -5,8 +5,10 @@ Runs Ghidra's analyzeHeadless with tools/ghidra/SyncSymbols.java on the imported
 every symbol of config/<version>/symbol_addrs*.txt is named at its address (link
 address + the program's image base), and a function is created for `type:func`
 symbols. Names set by hand in Ghidra are kept and listed. Needs Ghidra 12.2 with the
-ghidra-allegrex v21.5 extension and a JDK 25 (notes/GHIDRA.md); --ghidra, --jdk and
---project override the default paths.
+ghidra-allegrex v21.5 extension and a JDK 25 (notes/REFERENCES.md). The Ghidra
+install, JDK and project folders come from --ghidra, --jdk and --project, or from the
+JDTLF_GHIDRA_INSTALL_DIR, JDTLF_GHIDRA_JDK and JDTLF_GHIDRA_PROJECT environment
+variables.
 
 Usage:
   python tools/ghidra_sync.py --import    # first time: create the project, import
@@ -23,9 +25,9 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_GHIDRA = r"E:\Projets\Github\Decomp\Tools\Ghidra\ghidra_12.2_PUBLIC"
-DEFAULT_JDK = r"E:\Projets\Github\Decomp\Tools\Ghidra\jdk-25.0.5+8"
-DEFAULT_PROJECT = r"E:\Projets\Dev\jd-tlf-ghidra"
+DEFAULT_GHIDRA = os.environ.get("JDTLF_GHIDRA_INSTALL_DIR")
+DEFAULT_JDK = os.environ.get("JDTLF_GHIDRA_JDK")
+DEFAULT_PROJECT = os.environ.get("JDTLF_GHIDRA_PROJECT")
 PROJECT_NAME = "jd_tlf"
 PRX = "LEVELSTARTUP_DISC.PRX"
 SYMBOL_FILES = ("symbol_addrs.prx.txt", "symbol_addrs.txt")
@@ -41,6 +43,9 @@ def main():
                         help="import and analyze the PRX first")
     parser.add_argument("--dry-run", action="store_true", help="change nothing")
     args = parser.parse_args()
+    if not args.ghidra or not args.jdk or not args.project:
+        parser.error("set --ghidra, --jdk and --project, or JDTLF_GHIDRA_INSTALL_DIR, "
+                     "JDTLF_GHIDRA_JDK and JDTLF_GHIDRA_PROJECT")
 
     headless = os.path.join(args.ghidra, "support",
                             "analyzeHeadless.bat" if os.name == "nt" else "analyzeHeadless")

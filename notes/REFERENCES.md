@@ -4,8 +4,7 @@
 
 - [ethteck/splat](https://github.com/ethteck/splat) (`splat64[mips]` 0.50.1, MIT):
   `platform: psp` disassembles Allegrex (rabbitizer `R4000ALLEGREX`); no PRX-specific
-  segment type. Local clone: `E:\Projets\Github\Decomp\Tools\PSP\splat` (7548b97),
-  docs in `docs/Configuration.md` and `docs/Segments.md`.
+  segment type. Docs: `docs/Configuration.md` and `docs/Segments.md`.
 - [Decompollaborate/spimdisasm](https://github.com/Decompollaborate/spimdisasm) and
   rabbitizer: disassembler used by splat.
 - [decompals/binutils-mips-ps2-decompals](https://github.com/decompals/binutils-mips-ps2-decompals)
@@ -21,18 +20,16 @@
   [simonlindholm/decomp-permuter](https://github.com/simonlindholm/decomp-permuter):
   optional, once a compiler is known.
 - [decompme/compilers](https://github.com/decompme/compilers) and
-  [decomp.me](https://decomp.me): PSP compilers (psp-gcc, mwccpsp); not used for
-  sharing, the project is private.
+  [decomp.me](https://decomp.me): PSP compilers (psp-gcc, mwccpsp).
 - [pspdev/pspdev](https://github.com/pspdev/pspdev): homebrew toolchain (modern
   psp-gcc), for tests and tooling, not for matching.
 - [John-K/pspdecrypt](https://github.com/John-K/pspdecrypt) or PPSSPP
   `Core/ELF/PrxDecrypter.cpp`: decrypt `EBOOT.BIN` (step 7).
-- Ghidra 12.2 (`E:\Projets\Github\Decomp\Tools\Ghidra\ghidra_12.2_PUBLIC`, JDK 25
-  Temurin 25.0.5+8 beside it) with
+- Ghidra 12.2 (with a JDK 25: Temurin 25.0.5+8) with
   [kotcrab/ghidra-allegrex](https://github.com/kotcrab/ghidra-allegrex) v21.5 (PRX
   loader, Allegrex + VFPU, NID names), outside the repository; no ghidra-allegrex
   build exists for Ghidra 11.2.1, which the sibling projects use.
-- PPSSPP (`E:\Projets\Github\Emulateur\PSP\ppsspp`, 8d96fdb6cd, not built locally):
+- [hrydgard/ppsspp](https://github.com/hrydgard/ppsspp) (8d96fdb6cd; GPL, read only):
   debugger (breakpoints, memory, disassembly; `.ppmap`/`.sym` symbol maps loaded from
   next to the game, `Core/Debugger/SymbolMap.cpp`), WebSocket debugger API, PRX loader
   (`Core/ELF/ElfReader.cpp`), HLE NID tables (`Core/HLE/*.cpp`, source of
@@ -40,18 +37,17 @@
 - [TeamGDB/PortableKit](https://github.com/TeamGDB/PortableKit): suggested by the
   owner, not evaluated yet.
 
-## Reference projects (local clones)
+## Reference projects
 
-Search the local clones (Grep/Glob) before GitHub. A clone may be behind GitHub: ask
-the owner before `git pull`. When reusing code, record the clone's commit and the
-license in `notes/PROVENANCE.md`.
+When reusing code, record the commit it was taken from and the license in
+`notes/PROVENANCE.md`.
 
-| Folder | Project | License | Notes |
-|---|---|---|---|
-| `E:\Projets\Github\Decomp\PSP\sotn-decomp` | [Xeeynamo/sotn-decomp](https://github.com/Xeeynamo/sotn-decomp) (6c7ac7e21) | AGPL-3.0 (check before reuse) | PSP version `pspeu` built with mwccpsp 2.19 (`tools/builds/gen.py`), splat configs `config/splat.pspeu.*.yaml`, VFPU as `.word` (`tools/pspas`), decomp.me PSP preset 132 |
+| Project | License | Notes |
+|---|---|---|
+| [Xeeynamo/sotn-decomp](https://github.com/Xeeynamo/sotn-decomp) (6c7ac7e21) | AGPL-3.0 (check before reuse) | PSP version `pspeu` built with mwccpsp 2.19 (`tools/builds/gen.py`), splat configs `config/splat.pspeu.*.yaml`, VFPU as `.word` (`tools/pspas`), decomp.me PSP preset 132 |
 
-Sibling projects of the owner (methodology, scripts): `E:\Projets\Dev\mlab-decomp`,
-`E:\Projets\Dev\spyro-dotd-decomp`, `E:\Projets\Dev\ts2-castaway`.
+Sibling projects of the owner (methodology, scripts): `mlab-decomp`,
+`spyro-dotd-decomp` (Wii), `ts2-castaway-decomp` (DS).
 
 ## Hardware documentation
 
