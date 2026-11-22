@@ -1,0 +1,6 @@
+[submodule "tools/psp"]
+	path = tools/psp
+	url = https://github.com/YggdrasziI/psp-decomp-tools.git
+[submodule "tools/common"]
+	path = tools/common
+	url = https://github.com/YggdrasziI/decomp-tools.git
