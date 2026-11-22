@@ -9,6 +9,9 @@ versions = [
 
 binutils_prefix = "mips-ps2-decompals-"
 
+# tools/psp/ghidra_sync.py: the Ghidra project is <ghidra_project>_<version>
+ghidra_project = "jd_tlf"
+
 # PSP_GAME/USRDIR/BIN/LEVELSTARTUP_DISC.PRX, a relocatable PRX (notes/PRX.md)
 [modules.levelstartup]
 file = "LEVELSTARTUP_DISC.PRX"
