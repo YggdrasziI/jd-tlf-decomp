@@ -5,6 +5,25 @@ on:
   pull_request:
 
 jobs:
+  traces:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      # Local paths and attribution trailers, in the files and in the pushed commits
+      - name: Check traces
+        env:
+          # a secret, so the patterns stay masked in the public logs
+          TRACE_PATTERNS: ${{ secrets.TRACE_PATTERNS }}
+          RANGE: ${{ github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000' && format('{0}..{1}', github.event.before, github.sha) || github.sha }}
+        run: |
+          python3 tools/common/check_traces.py
+          python3 tools/common/check_traces.py --log "$RANGE"
+
   build:
     # This is a *private* build container (YggdrasziI/jd-tlf-decomp-build):
     # it holds the extracted game files in /orig.
