@@ -33,7 +33,7 @@
   debugger (breakpoints, memory, disassembly; `.ppmap`/`.sym` symbol maps loaded from
   next to the game, `Core/Debugger/SymbolMap.cpp`), WebSocket debugger API, PRX loader
   (`Core/ELF/ElfReader.cpp`), HLE NID tables (`Core/HLE/*.cpp`, source of
-  `config/nids.txt`).
+  `tools/psp/nids.txt`).
 - [TeamGDB/PortableKit](https://github.com/TeamGDB/PortableKit): suggested by the
   owner, not evaluated yet.
 

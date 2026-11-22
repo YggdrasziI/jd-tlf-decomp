@@ -54,7 +54,7 @@ identical SHA-1 (2026-10-27).
   `module_sdk_version` 0x10E1A0 (value `0x05050010`), `module_start_thread_parameter`
   0x114A94, `module_stop_thread_parameter` 0x114A84.
 - `tools/psp/prx_symbols.py` writes all of these to `config/NPUG80330/symbol_addrs.levelstartup.txt`;
-  NID names come from `config/nids.txt` (PPSSPP HLE tables, `--ppsspp` to rebuild).
+  NID names come from `tools/psp/nids.txt` (PPSSPP HLE tables, `--ppsspp` to rebuild).
 
 ## Build pipeline
 

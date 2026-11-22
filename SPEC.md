@@ -92,7 +92,7 @@ from the link is a later task.
 ## Naming conventions
 
 - splat default names stay until proven: `func_<vram>`, `D_<vram>`, `jtbl_<vram>`.
-- System imports: the NID's name from `config/nids.txt` (PPSSPP HLE tables). `mcp`
+- System imports: the NID's name from `tools/psp/nids.txt` (PPSSPP HLE tables). `mcp`
   imports: `mcp_<NID>` until the EBOOT export is identified.
 - Module exports: the standard SDK names of their NIDs (`module_start`...).
 - Game units: `src/<path from the source string>` when a source path is proven by a
@@ -106,7 +106,6 @@ from the link is a later task.
 ```
 README.md SPEC.md LICENSE
 decomp.toml               settings read by the tools: versions, module, compiler, regions
-config/nids.txt           NID -> name (generated from PPSSPP)
 config/NPUG80330/         build.sha1, splat.levelstartup.yaml, symbol_addrs.txt,
                           symbol_addrs.levelstartup.txt (generated)
 orig/NPUG80330/           the ISO and the extracted PRX (git-ignored)
