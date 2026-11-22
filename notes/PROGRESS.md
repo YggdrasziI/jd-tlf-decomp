@@ -6,3 +6,4 @@
 | 2026-10-28 | `97230e0` | 748 / 1095140 bytes (0.07 %) | 7 / 4048 | 1 / 1 (in 2 files, plus 3 assembly pieces) | `unit_000960A4` extended to 0x96528 (7 of its 8 functions) |
 | 2026-10-28 | `09c3082` | 812 / 1095140 bytes (0.07 %) | 12 / 4048 | 2 / 2 (plus 4 assembly pieces) | First unit with its own `.data` and static initialization, bounds from `.cplinit`: `unit_0009B834` |
 | 2026-10-28 | `0633ed4` | 1040 / 1095140 bytes (0.09 %) | 22 / 4048 | 4 / 4 (plus 6 assembly pieces) | `unit_0008EBB4` and `unit_0009E65C` (first unit with its own `.rodata`), same `.cplinit` method |
+| 2026-11-22 | `d498733` | 1124 / 1095140 bytes (0.10 %) | 27 / 4048 | 5 / 5 (plus 7 assembly pieces) | `unit_00090FE4`, the fourth file with the four callbacks and the float pair |
