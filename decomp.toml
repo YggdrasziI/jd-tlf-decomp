@@ -1,0 +1,45 @@
+# Project settings read by the tools of tools/psp and tools/common
+
+title = "Jak and Daxter: The Lost Frontier"
+
+# First one is the default version
+versions = [
+    "NPUG80330",  # US, DISC_VERSION 1.00
+]
+
+binutils_prefix = "mips-ps2-decompals-"
+
+# PSP_GAME/USRDIR/BIN/LEVELSTARTUP_DISC.PRX, a relocatable PRX (notes/PRX.md)
+[modules.levelstartup]
+file = "LEVELSTARTUP_DISC.PRX"
+splat = "splat.levelstartup.yaml"
+relocatable = true
+
+# Compiler of the C++ units (tools/configure.py): SN Systems SNC, the only build
+# tested; matched code needs debug information (notes/COMPILER.md). Downloaded to
+# tools/compilers/<name>/.
+[compiler]
+name = "pspsnc_1.2.7503.0"
+exe = "pspsnc.exe"
+flags = "-O2 -g"
+
+# tools/common/report_diff.py: units that hold the code not yet in a source file
+[report]
+auto_units = ["asm/"]
+
+# tools/common/try_unit.py: one source compiled outside the build and scored
+# against the assembly piece that holds the function
+[try]
+compile = "{python} tools/psp/compile.py tools/binutils/mips-ps2-decompals-objcopy{exe} {obj} {cc} -c {flags} -Iinclude -Isrc -o {obj} {src}"
+target = "build/{version}/asm/{version}/levelstartup/{piece}.s.o"
+
+# Code regions of the progress card (tools/common/progress_badges.py), from the
+# region map of notes/SPLITS.md
+[regions.NPUG80330]
+"Game and engine" = [[0x000000, 0x0F16AC]]
+"Libraries" = [[0x0F16AC, 0x10721C]]
+"Late copies" = [[0x10721C, 0x10B5E4]]
+
+# tools/common/check_traces.py: the README's disclosure line
+[traces]
+allow = ["decompile this for me"]
