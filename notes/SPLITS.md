@@ -10,7 +10,9 @@ when the unit is decompiled and matches.
 |---|---|---|
 | 0x000000-0x08EBB4 | `text` (asm) | `.text`, not split yet |
 | 0x08EBB4-0x08EC08 | `unit_0008EBB4` (cpp) | see Units |
-| 0x08EC08-0x0960A4 | `text_0008EC08` (asm) | `.text`, not split yet |
+| 0x08EC08-0x090FE4 | `text_0008EC08` (asm) | `.text`, not split yet |
+| 0x090FE4-0x091038 | `unit_00090FE4` (cpp) | see Units |
+| 0x091038-0x0960A4 | `text_00091038` (asm) | `.text`, not split yet |
 | 0x0960A4-0x09630C | `unit_000960A4` (cpp) | see Units |
 | 0x09630C-0x0964A4 | `text_0009630C` (asm) | `func_0009630C`, part of `unit_000960A4`, not matching yet |
 | 0x0964A4-0x096528 | `unit_000960A4_1` (cpp) | second part of `unit_000960A4` |
@@ -28,7 +30,9 @@ when the unit is decompiled and matches.
 | 0x1100B0-0x116100 | `rodata_001100B0` (rodata) | `.rodata` (+ padding to 0x116100) |
 | 0x116100-0x12B160 | `data` (data) | `.data` |
 | 0x12B160-0x12B168 | `unit_0008EBB4` (`.data`) | data of the unit |
-| 0x12B168-0x12CA90 | `data_0012B168` (data) | `.data` |
+| 0x12B168-0x12B8D8 | `data_0012B168` (data) | `.data` |
+| 0x12B8D8-0x12B8E0 | `unit_00090FE4` (`.data`) | data of the unit |
+| 0x12B8E0-0x12CA90 | `data_0012B8E0` (data) | `.data` |
 | 0x12CA90-0x12CA98 | `unit_0009B834` (`.data`) | data of the unit |
 | 0x12CA98-0x12DF70 | `data_0012CA98` (data) | `.data` |
 | 0x12DF70-0x12DF78 | `unit_0009E65C` (`.data`) | data of the unit |
@@ -92,6 +96,7 @@ Each is a lead for a unit name and bound (SPEC.md naming), not a bound:
 | `src/unit_000960A4.cpp` + `src/unit_000960A4_1.cpp` | 0x0960A4-0x096528 | `func_000960A4` (get `D_0012C280`), `func_000960B0` (`D_0012C280 == -1`), `func_000960C4` (set `D_0012BFE8`), `func_000960D0`/`func_00096160` (next/previous index in 0-5 where `func_000BC22C` returns 3), `func_000961E8` (applies the selection `D_0012C01C`), `func_0009630C` (assembly), `func_000964A4` (fills a selection) | 7 / 8 matching (2026-10-28); `func_0009630C` stays assembly (register allocation of the second owner test and the loop counters) | hypothesis: one file, since all eight use `D_0012C280` or the selection; the unit is split in two `.cpp` around the unfinished function |
 
 | `src/unit_0008EBB4.cpp` | 0x08EBB4-0x08EC08, data 0x12B160-0x12B168 | `func_0008EBB4`, `func_0008EBBC` (calls `func_0007E918`), `func_0008EBD8`, `func_0008EBE0` (passed together as callbacks by `func_0007FF08`), static initialization 0x8EBE8 (`D_0012B164 = D_0012B160 * 0.5f`) | matching, data included (2026-10-28) | **proven at both ends** (`.cplinit` entries 0x8EA44 and 0x8EBE8); same data and initialization as `unit_0009B834` (hypothesis: shared header) |
+| `src/unit_00090FE4.cpp` | 0x090FE4-0x091038, data 0x12B8D8-0x12B8E0 | `func_00090FE4`, `func_00090FEC` (calls `func_0007E918`), `func_00091008`, `func_00091010` (passed together as callbacks to `func_0007E774` with the id 0x28, at 0x7FEE0), static initialization 0x91018 (`D_0012B8DC = D_0012B8D8 * 0.5f`) | matching, data included (2026-11-22) | end **proven** (`.cplinit` entry 0x91018); start is a hypothesis: same callbacks, data and initialization as `unit_0008EBB4`, but the previous `.cplinit` entry ends at 0x90C90, so the file may start earlier (0x90C90-0x90FE4 uses `.data` 0x12B8A8-0x12B8D4) |
 | `src/unit_0009B834.cpp` | 0x09B834-0x09B874, data 0x12CA90-0x12CA98 | `func_0009B834`, `func_0009B83C`, `func_0009B844`, `func_0009B84C` (empty; passed together as callbacks by `func_0007FAF8`), static initialization 0x9B854 (`D_0012CA94 = D_0012CA90 * 0.5f`) | matching, data included (2026-10-28) | **proven at both ends**: the previous `.cplinit` entry ends at 0x9B834, this file's entry 0x9B854 ends it; its `.data` (the two floats, 8 bytes, 8-aligned) is the SNC layout of the source |
 | `src/unit_0009E65C.cpp` | 0x09E65C-0x09E6EC, rodata 0x110090-0x1100B0, data 0x12DF70-0x12DF78 | `func_0009E65C`, `func_0009E664` (empty), `func_0009E66C` (on flag 0x2000: `func_0007F450(0, 0)`, `func_00015FC0(4, 0)`), `func_0009E6A4` (`func_00066138(100, 100, "screenVehicleCustomization")`), static initialization 0x9E6CC (`D_0012DF74 = D_0012DF70 * 0.5f`) | matching, rodata and data included (2026-10-28); objdiff shows the `.rodata` at 91.5 % only because the target names the string `D_00110090` and SNC does not name literals (bytes identical) | **proven at both ends** (`.cplinit` entries 0x9E5F4 and 0x9E6CC); the string is padded to 8 bytes by SNC (0x20) |
 

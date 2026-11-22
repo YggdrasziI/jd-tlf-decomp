@@ -3,5 +3,6 @@
 // Static initializations of decompiled files: the name SNC gives them from the
 // source path (src/<unit>.cpp; tools/psp/compile.py makes them global for .cplinit)
 __sti__src_unit_0008EBB4_cpp = 0x0008EBE8; // type:func
+__sti__src_unit_00090FE4_cpp = 0x00091018; // type:func
 __sti__src_unit_0009B834_cpp = 0x0009B854; // type:func
 __sti__src_unit_0009E65C_cpp = 0x0009E6CC; // type:func
