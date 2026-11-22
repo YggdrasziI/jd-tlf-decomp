@@ -1,7 +1,7 @@
 # PRX format and build pipeline
 
 What the PSP module format means for this project, checked on
-`LEVELSTARTUP_DISC.PRX` (`python tools/prx_info.py`). Loader behaviour follows PPSSPP
+`LEVELSTARTUP_DISC.PRX` (`python tools/psp/prx_info.py`). Loader behaviour follows PPSSPP
 (`Core/ELF/ElfReader.cpp`, local clone at `8d96fdb6cd`), which is a reimplementation,
 not Sony's loader: anything only PPSSPP says is a hypothesis.
 
@@ -35,7 +35,7 @@ $a0, 0x170` means `.bss` 0x140A18 (0x1408A8 + 0x170), not `.text` 0x170.
 HI16 pairing (PPSSPP): a HI16 takes the low half of the next entry of the same table
 that is not a HI16; every value is computed from the words read before any patching.
 
-`tools/prx_reloc.py --absolute` adds the base of program header 1 at those sites
+`tools/psp/prx_reloc.py --absolute` adds the base of program header 1 at those sites
 (6197 bytes change); `--relative` undoes it. Round trip checked on the original:
 identical SHA-1 (2026-10-27).
 
@@ -53,7 +53,7 @@ identical SHA-1 (2026-10-27).
   `module_start` 0xF197C, `module_stop` 0xF1B04, `module_info` 0x10BC1C,
   `module_sdk_version` 0x10E1A0 (value `0x05050010`), `module_start_thread_parameter`
   0x114A94, `module_stop_thread_parameter` 0x114A84.
-- `tools/prx_symbols.py` writes all of these to `config/NPUG80330/symbol_addrs.prx.txt`;
+- `tools/psp/prx_symbols.py` writes all of these to `config/NPUG80330/symbol_addrs.levelstartup.txt`;
   NID names come from `config/nids.txt` (PPSSPP HLE tables, `--ppsspp` to rebuild).
 
 ## Build pipeline
@@ -62,15 +62,15 @@ identical SHA-1 (2026-10-27).
 orig PRX --prx_reloc --absolute--> build/NPUG80330/LEVELSTARTUP_DISC.abs.prx
          --splat--> asm/NPUG80330/levelstartup/*.s, build/NPUG80330/bin/elf_{header,tail}.bin,
                     build/NPUG80330/levelstartup.ld
-*.s --tools/assemble.py (vfpu_words + as)--> .o ; *.bin --objcopy -I binary--> .o
-src/*.cpp --tools/compile.py (SNC -O2 -g, empty sections removed)--> .o
+*.s --tools/psp/assemble.py (vfpu_words + as)--> .o ; *.bin --objcopy -I binary--> .o
+src/*.cpp --tools/psp/compile.py (SNC -O2 -g, empty sections removed)--> .o
 ld -T levelstartup.ld --> levelstartup.elf --objcopy -O binary--> levelstartup.bin
    --prx_reloc --relative--> LEVELSTARTUP_DISC.PRX --sha1--> OK
 ```
 
 The PRX relocation tables are the reference for what is an address:
-`tools/reloc_overrides.py` writes a `MIPS_NONE` override (`config/NPUG80330/
-reloc_addrs.prx.txt`) for every `%hi`/`%lo` or `.word` symbol of the splat output
+`tools/psp/reloc_overrides.py` writes a `MIPS_NONE` override (`config/NPUG80330/
+reloc_addrs.levelstartup.txt`) for every `%hi`/`%lo` or `.word` symbol of the splat output
 that has no relocation. Without them, constants such as `lui $a0, 0x7; addiu $a0,
 0x6B10` became references to code labels (`.L00076B10`) that break the link once
 `.text` is in several files; most entries are zero data words (null pointers).

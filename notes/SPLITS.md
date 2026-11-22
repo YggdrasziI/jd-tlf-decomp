@@ -60,10 +60,10 @@ showing each string or import; their inner bounds are approximate.
 ## Unit ends from `.cplinit`
 
 SNC emits the static initialization of a file (`__sti__<file>`) after all its
-other functions and lists it in `.cplinit` (`tools/probes/snc_sti.cpp`,
+other functions and lists it in `.cplinit` (`tools/psp/probes/snc_sti.cpp`,
 `notes/COMPILER.md`). The PRX `.cplinit` holds 88 such functions, in increasing
 address order (= link order): each ends the own code of one source file.
-`python tools/tu_ends.py` lists them with the unit end. Files without global
+`python tools/psp/tu_ends.py` lists them with the unit end. Files without global
 objects to construct have no entry, so two entries can enclose several files.
 
 - 87 entries in the game region, from 0x0007D8 to 0x0EA214; the densest stretch is

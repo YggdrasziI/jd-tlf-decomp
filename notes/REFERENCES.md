@@ -10,7 +10,7 @@
 - [decompals/binutils-mips-ps2-decompals](https://github.com/decompals/binutils-mips-ps2-decompals)
   v0.10: Windows/Linux/macOS builds of `as`/`ld`/`objcopy`. They have no
   `-march=allegrex` and no VFPU: the build assembles as `-march=mips32r2 -mabi=32`
-  and `tools/vfpu_words.py` emits VFPU and Allegrex-only instructions as `.word`.
+  and `tools/psp/vfpu_words.py` emits VFPU and Allegrex-only instructions as `.word`.
   Alternative: [sozud/binutils-allegrex](https://github.com/sozud/binutils-allegrex)
   (used by sotn-decomp, Linux build in its releases).
 - [encounter/objdiff](https://github.com/encounter/objdiff): diff and report.

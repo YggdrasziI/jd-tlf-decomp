@@ -1,11 +1,11 @@
 # splat config for USRDIR/BIN/LEVELSTARTUP_DISC.PRX (NPUG80330, US 1.00)
 #
-# The target is the "absolute" image written by tools/prx_reloc.py --absolute:
+# The target is the "absolute" image written by tools/psp/prx_reloc.py --absolute:
 # the PRX with every reference to program header 1 (.sdata/.sbss/.bss) moved
 # from segment-relative to absolute, so symbols resolve. The build links this
-# layout, then tools/prx_reloc.py --relative gives back the PRX.
+# layout, then tools/psp/prx_reloc.py --relative gives back the PRX.
 #
-# File layout (tools/prx_info.py): ELF header + program headers, program
+# File layout (tools/psp/prx_info.py): ELF header + program headers, program
 # header 0 (file 0x74, vram 0x0), program header 1 (file 0x140918, vram
 # 0x1408A8), then .shstrtab, section headers, relocation tables, .symtab.
 options:
@@ -21,11 +21,11 @@ options:
   asset_path: build/NPUG80330/bin
   cache_path: build/NPUG80330/.splat_cache
   symbol_addrs_path:
-    - config/NPUG80330/symbol_addrs.prx.txt
+    - config/NPUG80330/symbol_addrs.levelstartup.txt
     - config/NPUG80330/symbol_addrs.txt
-  # symbol guesses the PRX does not relocate (tools/reloc_overrides.py)
+  # symbol guesses the PRX does not relocate (tools/psp/reloc_overrides.py)
   reloc_addrs_path:
-    - config/NPUG80330/reloc_addrs.prx.txt
+    - config/NPUG80330/reloc_addrs.levelstartup.txt
   undefined_funcs_auto_path: build/NPUG80330/undefined_funcs_auto.txt
   undefined_syms_auto_path: build/NPUG80330/undefined_syms_auto.txt
   # module info: gp 0x7FF0 relative to program header 1 (0x1408A8)

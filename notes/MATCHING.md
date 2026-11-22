@@ -1,7 +1,7 @@
 # Matching techniques
 
 Techniques that fixed a near-miss in this project, with the function where they were
-found. Empty sections are placeholders until the compiler is known (`notes/COMPILER.md`).
+found (compiler: `notes/COMPILER.md`). Empty sections are placeholders.
 
 ## MIPS / Allegrex basics to keep in mind
 
@@ -13,7 +13,7 @@ found. Empty sections are placeholders until the compiler is known (`notes/COMPI
   flag (`-G`).
 - Floats: single precision FPU (`lwc1`, `mul.s`, `c.lt.s` + `bc1t`); no doubles in
   hardware.
-- VFPU: assembled as `.word` (`tools/vfpu_words.py`); in C it needs inline assembly or
+- VFPU: assembled as `.word` (`tools/psp/vfpu_words.py`); in C it needs inline assembly or
   intrinsics, so VFPU functions stay assembly until the compiler's VFPU support is
   known.
 
@@ -39,7 +39,7 @@ found. Empty sections are placeholders until the compiler is known (`notes/COMPI
   initialized globals (`unit_0009B834`).
 - The static initialization is named by SNC after the path given to it:
   `__sti__src_<unit>_cpp`. Put that name in `symbol_addrs.txt` at its address;
-  `tools/compile.py` makes it global for the `.cplinit` table.
+  `tools/psp/compile.py` makes it global for the `.cplinit` table.
 
 ## Control flow
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate build.ninja for the Jak and Daxter: The Lost Frontier decompilation.
 
-Pipeline for each module (SPEC.md, "Build"):
+Pipeline for each module of decomp.toml (SPEC.md, "Build"):
 
   orig PRX --prx_reloc --absolute--> absolute image --splat--> asm/, linker script
   asm/*.s --vfpu_words--> as --> .o ; src/*.cpp --SNC (compile.py)--> .o ;
@@ -22,29 +22,22 @@ import subprocess
 import sys
 from pathlib import Path
 
-import ninja_syntax
-from get_platform import get_platform
-
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(ROOT / "tools" / "psp"))
+sys.path.insert(0, str(ROOT / "tools" / "common"))
 
-VERSIONS = [
-    "NPUG80330",  # US, DISC_VERSION 1.00
-]
-
-# Modules built per version: name -> (PRX file name, splat config)
-MODULES = {
-    "levelstartup": ("LEVELSTARTUP_DISC.PRX", "splat.levelstartup.yaml"),
-}
+import ninja_syntax  # noqa: E402
+import project  # noqa: E402
+from get_platform import get_platform  # noqa: E402
 
 BINUTILS_TAG = "v0.10"  # decompals/binutils-mips-ps2-decompals
-BINUTILS_PREFIX = "mips-ps2-decompals-"
+BINUTILS_PREFIX = project.BINUTILS_PREFIX
 OBJDIFF_VERSION = "v3.8.3"
 WIBO_VERSION = "1.2.0"  # runs the Windows compiler on Linux and macOS
-COMPILER = "pspsnc_1.2.7503.0"  # notes/COMPILER.md
-
-# Matched code: SNC at -O2 with debug information (notes/COMPILER.md)
-CC_FLAGS = "-O2 -g -Iinclude -Isrc"
+# SN Systems SNC ([compiler] of decomp.toml, notes/COMPILER.md)
+COMPILER = project.CONFIG["compiler"]["name"]
+CC_EXE = project.CONFIG["compiler"]["exe"]
+CC_FLAGS = project.CONFIG["compiler"]["flags"] + " -Iinclude -Isrc"
 
 AS_FLAGS = "-EL -march=mips32r2 -mabi=32 -G0 -no-pad-sections -Iinclude"
 LD_FLAGS = "-EL --no-check-sections"
@@ -52,7 +45,7 @@ LD_FLAGS = "-EL --no-check-sections"
 
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument("-v", "--version", choices=VERSIONS, default=VERSIONS[0])
+parser.add_argument("-v", "--version", choices=project.VERSIONS, default=project.DEFAULT_VERSION)
 parser.add_argument("--binutils", type=Path, help="Directory of pre-installed binutils")
 parser.add_argument("--no-split", action="store_true",
                     help="Do not run splat (use the existing asm/ and linker script)")
@@ -69,6 +62,7 @@ config_dir = Path("config") / version
 binutils_dir = args.binutils or Path("tools") / "binutils"
 compiler_dir = Path("tools") / "compilers" / COMPILER
 python = sys.executable.replace("\\", "/")
+psp = "tools/psp"
 
 
 def tool(name: str) -> str:
@@ -79,15 +73,15 @@ def posix(path: Path | str) -> str:
     return str(path).replace("\\", "/")
 
 
-def split(module: str) -> None:
-    """Write the absolute image and run splat for one module."""
-    prx_name, splat_config = MODULES[module]
-    image = build_dir / prx_name.replace(".PRX", ".abs.prx")
+def split(module: project.Module) -> None:
+    """Run splat for one module (PRX: on its absolute image)."""
     # splat does not delete files of subsegments that were renamed or split
-    shutil.rmtree(ROOT / "asm" / version / module, ignore_errors=True)
-    subprocess.run([sys.executable, "tools/prx_reloc.py", str(orig_dir / prx_name),
-                    str(image), "--absolute"], check=True, cwd=ROOT)
-    subprocess.run([sys.executable, "-m", "splat", "split", str(config_dir / splat_config)],
+    shutil.rmtree(ROOT / "asm" / version / module.name, ignore_errors=True)
+    if module.relocatable:
+        image = build_dir / module.file.replace(".PRX", ".abs.prx")
+        subprocess.run([sys.executable, f"{psp}/prx_reloc.py", str(orig_dir / module.file),
+                        str(image), "--absolute"], check=True, cwd=ROOT)
+    subprocess.run([sys.executable, "-m", "splat", "split", str(config_dir / module.splat)],
                    check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
 
 
@@ -131,7 +125,7 @@ def write_objdiff(units: list[dict]) -> None:
         "custom_make": "ninja",
         "build_base": True,
         "build_target": False,
-        "watch_patterns": ["*.c", "*.cpp", "*.h", "*.hpp", "*.py", "*.yaml", "*.txt"],
+        "watch_patterns": ["*.c", "*.cpp", "*.h", "*.hpp", "*.py", "*.yaml", "*.txt", "*.toml"],
         "units": units,
     }
     (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n", newline="\n")
@@ -149,39 +143,39 @@ def main() -> None:
 
     binutils_stamp = binutils_dir / f"{BINUTILS_PREFIX}as{platform.exe}"
     n.rule("download_binutils",
-           f"$python tools/download_tool.py binutils {BINUTILS_TAG} --path {posix(binutils_dir)}",
+           f"$python {psp}/download_tool.py binutils {BINUTILS_TAG} --path {posix(binutils_dir)}",
            description="DOWNLOAD binutils $tag")
     n.build(posix(binutils_stamp), "download_binutils")
     n.rule("download_objdiff",
-           f"$python tools/download_tool.py objdiff {OBJDIFF_VERSION} --path $out",
+           f"$python {psp}/download_tool.py objdiff {OBJDIFF_VERSION} --path $out",
            description="DOWNLOAD objdiff-cli")
     n.build(f"objdiff-cli{platform.exe}", "download_objdiff")
-    snc = compiler_dir / "pspsnc.exe"
-    n.rule("download_compiler", f"$python tools/download_tool.py compiler {COMPILER} --path {posix(compiler_dir)}",
+    snc = compiler_dir / CC_EXE
+    n.rule("download_compiler", f"$python {psp}/download_tool.py compiler {COMPILER} --path {posix(compiler_dir)}",
            description=f"DOWNLOAD {COMPILER}")
     n.build(posix(snc), "download_compiler")
-    cc_deps = [posix(snc), "tools/compile.py"]
+    cc_deps = [posix(snc), f"{psp}/compile.py"]
     if platform.system == "windows":
         cc_command = str(snc)
     else:
-        n.rule("download_wibo", f"$python tools/download_tool.py wibo {WIBO_VERSION} --path $out",
+        n.rule("download_wibo", f"$python {psp}/download_tool.py wibo {WIBO_VERSION} --path $out",
                description="DOWNLOAD wibo")
         n.build("tools/wibo", "download_wibo")
         cc_deps.append("tools/wibo")
         cc_command = f"tools/wibo {posix(snc)}"
     n.newline()
 
-    n.rule("as", f"$python tools/assemble.py {posix(tool('as'))} $in $out $as_flags",
+    n.rule("as", f"$python {psp}/assemble.py {posix(tool('as'))} $in $out $as_flags",
            description="AS $in")
-    n.rule("cc", f"$python tools/compile.py {posix(tool('objcopy'))} $out {posix(cc_command)} -c $cc_flags -o $out $in",
+    n.rule("cc", f"$python {psp}/compile.py {posix(tool('objcopy'))} $out {posix(cc_command)} -c $cc_flags -o $out $in",
            description="CC $in")
     n.rule("bin", f"{tool('objcopy')} -I binary -O elf32-littlemips -B mips $in $out",
            description="BIN $in")
     n.rule("ld", f"{tool('ld')} $ld_flags -T $script $undefined -Map $map -o $out",
            description="LD $out")
     n.rule("objcopy", f"{tool('objcopy')} -O binary $in $out", description="OBJCOPY $out")
-    n.rule("relative", "$python tools/prx_reloc.py $in $out --relative", description="PRX $out")
-    n.rule("check", "$python tools/sha1.py $in", description="CHECK $in")
+    n.rule("relative", f"$python {psp}/prx_reloc.py $in $out --relative", description="PRX $out")
+    n.rule("check", "$python tools/common/sha1.py $in", description="CHECK $in")
     n.rule("configure", f"$python tools/configure.py --version {version}",
            description="CONFIGURE", generator=True)
     n.newline()
@@ -191,11 +185,13 @@ def main() -> None:
            description="REPORT $out")
     n.newline()
 
+    # the assembly passes through these scripts: a change must assemble again
+    as_deps = [posix(binutils_stamp), f"{psp}/assemble.py", f"{psp}/vfpu_words.py"]
     checks = []
     units = []
     unit_objs = []
-    for module, (prx_name, splat_config) in MODULES.items():
-        ld_script = build_dir / f"{module}.ld"
+    for module in project.MODULES.values():
+        ld_script = build_dir / f"{module.name}.ld"
         if not args.no_split or not (ROOT / ld_script).exists():
             split(module)
         objs = linker_inputs(ld_script)
@@ -204,39 +200,42 @@ def main() -> None:
             # build/<v>/bin/x.bin.o <- build/<v>/bin/x.bin
             src = obj[:-2]
             if src.endswith(".s"):
-                n.build(obj, "as", src[len(posix(build_dir)) + 1:], implicit=[posix(binutils_stamp)])
+                n.build(obj, "as", src[len(posix(build_dir)) + 1:], implicit=as_deps)
                 if Path(src).name.startswith("text"):
                     # code not split into units yet
-                    units.append({"name": f"asm/{module}/{Path(src).stem}", "target_path": obj,
+                    units.append({"name": f"asm/{module.name}/{Path(src).stem}", "target_path": obj,
                                   "metadata": {"complete": False, "auto_generated": True}})
                     unit_objs.append(obj)
             elif src.endswith((".c", ".cpp")):
                 source = src[len(posix(build_dir)) + 1:]
                 n.build(obj, "cc", source, implicit=cc_deps + [posix(binutils_stamp)])
                 unit = Path(source).with_suffix("").relative_to("src").as_posix()
-                target_asm = write_target_asm(module, unit)
+                target_asm = write_target_asm(module.name, unit)
                 # A cpp unit holds matched functions only, so it is always linked from source
                 unit_entry = {"name": unit, "base_path": obj,
                               "metadata": {"complete": True, "source_path": source}}
                 if target_asm:
                     target_obj = posix(build_dir / "target" / f"{unit}.o")
-                    n.build(target_obj, "as", posix(target_asm), implicit=[posix(binutils_stamp)])
+                    n.build(target_obj, "as", posix(target_asm), implicit=as_deps)
                     unit_entry["target_path"] = target_obj
                     unit_objs.append(target_obj)
                 units.append(unit_entry)
                 unit_objs.append(obj)
             else:
                 n.build(obj, "bin", src, implicit=[posix(binutils_stamp)])
-        elf = build_dir / f"{module}.elf"
+        elf = build_dir / f"{module.name}.elf"
         undefined = [build_dir / "undefined_syms_auto.txt", build_dir / "undefined_funcs_auto.txt"]
         n.build(posix(elf), "ld", objs, implicit=[posix(ld_script)] + [posix(u) for u in undefined],
                 variables={"script": posix(ld_script), "map": posix(elf.with_suffix(".map")),
                            "undefined": " ".join(f"-T {posix(u)}" for u in undefined)})
-        image = build_dir / f"{module}.bin"
-        n.build(posix(image), "objcopy", posix(elf))
-        prx = build_dir / prx_name
-        n.build(posix(prx), "relative", posix(image))
-        check = f"check_{module}"
+        prx = build_dir / module.file
+        if module.relocatable:
+            image = build_dir / f"{module.name}.bin"
+            n.build(posix(image), "objcopy", posix(elf))
+            n.build(posix(prx), "relative", posix(image))
+        else:
+            n.build(posix(prx), "objcopy", posix(elf))
+        check = f"check_{module.name}"
         n.build(check, "check", posix(config_dir / "build.sha1"), implicit=[posix(prx)])
         checks.append(check)
         n.newline()
@@ -248,9 +247,10 @@ def main() -> None:
     n.newline()
 
     # splat reads the symbol and relocation files too: a change must split again
-    split_inputs = [posix(config_dir / c) for _, c in MODULES.values()] + [
-        posix(config_dir / f) for f in ("symbol_addrs.txt", "symbol_addrs.prx.txt", "reloc_addrs.prx.txt")]
-    n.build("build.ninja", "configure", implicit=["tools/configure.py"] + split_inputs)
+    split_inputs = [posix(config_dir / m.splat) for m in project.MODULES.values()]
+    split_inputs += [posix(p.relative_to(ROOT)) for p in sorted((ROOT / config_dir).glob("symbol_addrs*.txt"))]
+    split_inputs += [posix(p.relative_to(ROOT)) for p in sorted((ROOT / config_dir).glob("reloc_addrs*.txt"))]
+    n.build("build.ninja", "configure", implicit=["tools/configure.py", "decomp.toml"] + split_inputs)
     n.build("all", "phony", checks)
     n.default("all")
     print("build.ninja written")

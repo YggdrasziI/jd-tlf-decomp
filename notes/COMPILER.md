@@ -9,7 +9,7 @@ a source difference. A compiler is proven only by byte-identical probes; more pr
 
 ## Probes
 
-`python tools/compiler_probe.py <src> [--cc <exe>] -- <flags>` compiles a probe and
+`python tools/psp/compiler_probe.py <src> --cc <exe> -- <flags>` compiles a probe and
 compares every function named `func_XXXXXXXX` with the original at that vram,
 relocated fields masked. Compilers come from the decomp.me releases
 (`https://github.com/decompme/compilers/releases/download/compilers/<id>.tar.gz`) and
@@ -17,17 +17,17 @@ are unpacked in `tools/compilers/<id>/` (ignored by git).
 
 | Date | Probe | Compiler, flags | Result |
 |---|---|---|---|
-| 2026-10-28 | `tools/probes/snc_leaf.cpp` (8 small leaf functions) | `pspsnc_1.2.7503.0 -O2` (`-O3` same) | **6/8 identical**: `func_00015F6C`, `func_000225A8`, `func_00027728`, `func_0007F95C` (a constructor returning `this`), `func_000960A4`, `func_00109318` |
+| 2026-10-28 | `tools/psp/probes/snc_leaf.cpp` (8 small leaf functions) | `pspsnc_1.2.7503.0 -O2` (`-O3` same) | **6/8 identical**: `func_00015F6C`, `func_000225A8`, `func_00027728`, `func_0007F95C` (a constructor returning `this`), `func_000960A4`, `func_00109318` |
 | 2026-10-28 | same | `pspsnc_1.2.7503.0 -O0`, `-O1` | 0/8 (unoptimised code) |
 | 2026-10-28 | same | `-O2 -Xretpts=0` / `=1` | no change, 6/8 |
 | 2026-10-28 | `func_0007E6D8`, 9 source variants (single return, `goto`, `bool`, `?:`) | `pspsnc_1.2.7503.0 -O2` | no match: SNC duplicates `jr $ra`, the original branches to a single epilogue |
 | 2026-10-28 | `func_001051AC`, 4 variants (extra parameters, member function, local copy) | `pspsnc_1.2.7503.0 -O2` | no match: the original uses `$a1` for the loaded pointer, SNC `$a0` |
 | 2026-10-28 | `snc_leaf.cpp` | `mwccpsp_3.0.1_219` run natively | did not finish (hangs, likely the licence manager); to retry through wibo |
-| 2026-10-28 | `tools/probes/snc_branch.cpp` (8 functions: loops, early returns, floats) | `pspsnc_1.2.7503.0 -O2` | 1/8: SNC merges and duplicates returns, uses branch-likely |
+| 2026-10-28 | `tools/psp/probes/snc_branch.cpp` (8 functions: loops, early returns, floats) | `pspsnc_1.2.7503.0 -O2` | 1/8: SNC merges and duplicates returns, uses branch-likely |
 | 2026-10-28 | same | `-O2` + one `-X<var>=0..5` at a time (alias, callmod, constp, copyp, fcm, flow, inllev, sinllev, mopt, reg, sched, unroll, xopt, zone) | no improvement over `-O2` |
 | 2026-10-28 | both probes | **`-O2 -g`** | **15/16** after source fixes (`snc_leaf` 8/8, `snc_branch` 7/8); `-O3 -g` same, `-O1 -g` 0/16 |
 | 2026-10-28 | both probes | `-O2 -g` + one `-X<var>` at a time | no improvement over `-O2 -g` |
-| 2026-10-28 | `tools/probes/snc_sti.cpp` (layout: functions around two global objects) | `pspsnc_1.2.7503.0 -O2 -g` | functions in source order, then `__sti__snc_sti_cpp` (constructors, `__record_needed_destruction`) **last in `.text`**, and one 8-byte entry (address, 0) in `__cplinit`: the format of the PRX `.cplinit` (`tools/tu_ends.py`) |
+| 2026-10-28 | `tools/psp/probes/snc_sti.cpp` (layout: functions around two global objects) | `pspsnc_1.2.7503.0 -O2 -g` | functions in source order, then `__sti__snc_sti_cpp` (constructors, `__record_needed_destruction`) **last in `.text`**, and one 8-byte entry (address, 0) in `__cplinit`: the format of the PRX `.cplinit` (`tools/psp/tu_ends.py`) |
 
 SNC 1.2.7503.0 reproduces the idioms of the original: `or $rd, $rs, $zero` for moves,
 `ori` for small constants, a 16-byte frame with `$ra` at `0($sp)`, `$a0` as the

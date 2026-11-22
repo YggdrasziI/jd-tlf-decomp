@@ -16,12 +16,12 @@ Out of scope: a port, game assets, any redistribution of game files.
 | ISO SHA-1 | `70ec78b94b142fdff3072c207b13cb6cda22941e` (1453916160 bytes) | `tools/extract.py` |
 | Target module | `PSP_GAME/USRDIR/BIN/LEVELSTARTUP_DISC.PRX`, 1610377 bytes, SHA-1 `c0204feebb7ba0e643b12008880da7b074b627cf` | `config/NPUG80330/build.sha1` |
 | Module | name `jak1`, version 1.1, attributes 0, SDK version word `0x05050010` | `.rodata.sceModuleInfo`, `module_sdk_version` (0x10E1A0) |
-| Format | unencrypted relocatable PRX (ELF type 0xFFA0, flags 0x10A23001), 2 program headers, 56 section headers, empty `.symtab` | `tools/prx_info.py` |
+| Format | unencrypted relocatable PRX (ELF type 0xFFA0, flags 0x10A23001), 2 program headers, 56 section headers, empty `.symtab` | `tools/psp/prx_info.py` |
 | Program header 0 | file 0x74, vram 0x0, 0x1408A4 bytes: `.text` 0x0-0x10B5E4 (0x10B5E4), import stubs, `.rodata` 0x10BF80-0x1160C8, `.data` 0x116100-0x13FCF5, `.eh_frame`, `.sceStub.text.mcp`, `.ctors`, `.dtors`, `.cplinit`, `.linkonce.d` | section headers |
 | Program header 1 | file 0x140918, vram 0x1408A8: `.sdata` 0x18, `.sbss` 0x120, `.bss` 0x98F70; `$gp` = segment base + 0x7FF0 = 0x148898 | section headers, module info |
 | Entry | `module_start` 0xF197C, `module_stop` 0xF1B04 | `.lib.ent` (standard SDK export NIDs) |
-| Imports | 15 system libraries (124 functions, named from their NID) and 92 functions of `mcp`, the module in `SYSDIR/EBOOT.BIN` | `.lib.stub`, `config/NPUG80330/symbol_addrs.prx.txt` |
-| Relocations | `.rel.text`: 14681 R_MIPS_26, 8109 R_MIPS_HI16, 10605 R_MIPS_LO16; data tables: R_MIPS_32. References into program header 1 are stored relative to its base | `tools/prx_info.py`, `notes/PRX.md` |
+| Imports | 15 system libraries (124 functions, named from their NID) and 92 functions of `mcp`, the module in `SYSDIR/EBOOT.BIN` | `.lib.stub`, `config/NPUG80330/symbol_addrs.levelstartup.txt` |
+| Relocations | `.rel.text`: 14681 R_MIPS_26, 8109 R_MIPS_HI16, 10605 R_MIPS_LO16; data tables: R_MIPS_32. References into program header 1 are stored relative to its base | `tools/psp/prx_info.py`, `notes/PRX.md` |
 | Source language | C++ (`v:/PROJECTS/JAK1/CODE/ENGINE/video.cpp`, `.../ENGINE/PSP/PSPDraw.cpp`, `.../SHARED/WAD/loader.cpp`...) | strings in `.rodata` |
 
 Other modules on the disc (later): `SYSDIR/EBOOT.BIN` (encrypted
@@ -38,7 +38,7 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
 - binutils from [decompals/binutils-mips-ps2-decompals](https://github.com/decompals/binutils-mips-ps2-decompals)
   **v0.10** (`as -march=mips32r2 -mabi=32`, `ld`, `objcopy`), downloaded by `ninja`
   into `tools/binutils/`. This GNU as knows neither Allegrex nor the VFPU:
-  `tools/vfpu_words.py` turns VFPU instructions and the Allegrex-only ones (`min`,
+  `tools/psp/vfpu_words.py` turns VFPU instructions and the Allegrex-only ones (`min`,
   `max`, `clz`, `madd`... encoded differently on mips32) into `.word`.
 - objdiff-cli **v3.8.3** (report, diff), objdiff GUI.
 - m2c (matt-kempster/m2c, pinned commit `c632946b`, installed from git: the PyPI
@@ -46,26 +46,26 @@ Evidence and the candidate analysis go in `notes/COMPILER.md`.
   `python -m m2c.main --target mipsel-gcc-c --function <name>
   build/NPUG80330/asm/NPUG80330/levelstartup/text.s.vfpu.s` (the `.vfpu.s` copy written
   by the build, since m2c cannot parse VFPU mnemonics).
-- Compiler: **not identified**. SN Systems SNC is suspected (`notes/COMPILER.md`);
-  nothing is compiled from C until it is settled.
+- Compiler: SN Systems SNC, `pspsnc_1.2.7503.0 -O2 -g` (`[compiler]` of
+  `decomp.toml`); the game's exact version is not proven (`notes/COMPILER.md`).
 - Optional: Ghidra 12.2 (JDK 25) with ghidra-allegrex v21.5, outside the repository
-  (`tools/ghidra_sync.py`).
+  (`tools/psp/ghidra_sync.py`).
   PPSSPP for runtime debugging.
 
 ## Build pipeline
 
-1. `tools/prx_reloc.py --absolute`: the original PRX with every reference to program
+1. `tools/psp/prx_reloc.py --absolute`: the original PRX with every reference to program
    header 1 made absolute, so the disassembly gets the right symbols.
-2. splat splits that image, with `config/NPUG80330/reloc_addrs.prx.txt` turning back
+2. splat splits that image, with `config/NPUG80330/reloc_addrs.levelstartup.txt` turning back
    into plain values the address guesses the PRX does not relocate
-   (`tools/reloc_overrides.py`): ELF header and the tail (`.shstrtab`, section headers,
+   (`tools/psp/reloc_overrides.py`): ELF header and the tail (`.shstrtab`, section headers,
    relocation tables, `.symtab`) as `bin`, program header 0 as text, rodata and data
    regions, program header 1 as `.sdata` + bss.
-3. `as` for assembly, SNC for `src/` (`tools/compile.py`: `-O2 -g`, then removes
+3. `as` for assembly, SNC for `src/` (`tools/psp/compile.py`: `-O2 -g`, then removes
    the empty `.rodata`/`.data` SNC always emits, whose 8-byte alignment would add
    padding), `objcopy -I binary`, then `ld` with the splat linker script, `objcopy -O
    binary`: the absolute image.
-4. `tools/prx_reloc.py --relative` gives the PRX back; `tools/sha1.py` checks it.
+4. `tools/psp/prx_reloc.py --relative` gives the PRX back; `tools/common/sha1.py` checks it.
 
 The relocation tables are still copied from the original (`elf_tail.bin`): this holds
 while the layout does not move, which a matching build guarantees. Generating them
@@ -105,14 +105,17 @@ from the link is a later task.
 
 ```
 README.md SPEC.md LICENSE
+decomp.toml               settings read by the tools: versions, module, compiler, regions
 config/nids.txt           NID -> name (generated from PPSSPP)
 config/NPUG80330/         build.sha1, splat.levelstartup.yaml, symbol_addrs.txt,
-                          symbol_addrs.prx.txt (generated)
+                          symbol_addrs.levelstartup.txt (generated)
 orig/NPUG80330/           the ISO and the extracted PRX (git-ignored)
 asm/                      splat output (git-ignored)
 build/                    build output (git-ignored)
 src/  include/            sources and headers
-tools/                    configure.py and scripts
+tools/                    configure.py, extract.py
+tools/psp/  tools/common/ shared tools (git submodules): PSP modules, splat helpers;
+                          comparison, report gate, progress card
 progress/NPUG80330/       progress badges and history (README images)
 notes/                    reference documentation
 .github/workflows/        CI: rebuild and check the PRX in a private image
@@ -121,6 +124,7 @@ notes/                    reference documentation
 ## Build
 
 ```
+git submodule update --init
 pip install -r tools/requirements.txt
 python tools/extract.py      # orig/NPUG80330/<iso> -> LEVELSTARTUP_DISC.PRX, SHA-1 checks
 python tools/configure.py    # absolute image, splat, build.ninja

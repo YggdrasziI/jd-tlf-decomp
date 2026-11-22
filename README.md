@@ -38,7 +38,7 @@ Progress
 - **Linked**: code built from source (the `cpp` units of the splat config).
 
 The badges and the card are drawn from the objdiff report by
-`tools/progress_badges.py`. After `ninja report`, `python tools/progress_badges.py
+`tools/common/progress_badges.py`. After `ninja report`, `python tools/common/progress_badges.py
 --record` redraws `progress/NPUG80330/` and adds the current commit to
 `progress/NPUG80330/history.csv`; commit the `progress/` folder with it.
 
@@ -62,6 +62,7 @@ Building
 2. Run:
 
    ```
+   git submodule update --init
    python tools/extract.py
    python tools/configure.py
    ninja
